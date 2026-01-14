@@ -18,6 +18,7 @@ app.config["SECRET_KEY"] = "super-secret-key"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
+app.config['WTF_CSRF_ENABLED'] = False
 
 app.register_blueprint(auth_bp)
 db.init_app(app)
