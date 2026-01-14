@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+{% block title %}{{ place.name }} — GreenSpots{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+.btn-green {
+    background-color: #28a745;
+    color: white;
+    border: 1px solid #28a745;
+}
+.btn-outline-green {
+    background-color: transparent;
+    color: #28a745;
+    border: 1px solid #28a745;
+}
+
+/* IMAGE */
+.img-banner {
+    margin-top: 60px;
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+
+/* TITLE */
+.head-text {
+    font-size: 36px;
+    font-weight: 700;
+    margin-top: 20px;
+}
+
+/* DESCRIPTION */
+.place-description {
+    font-size: 20px;
+    line-height: 1.6;
+}
+.star-rating {
+    font-size: 30px;
+    cursor: pointer;
+    display: inline-block;
+}
+.star {
+    color: gold;
+    transition: transform 0.1s;
+}
+.star:hover,
+.star.hover,
+.star.selected {
+    transform: scale(1.2);
+}
+
+/* MAP */
+#place-map {
+    width: 100%;
+    height: 400px;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Place Image & Title -->
+    <div class="text-center mb-4">
+        <img src="{{ url_for('static', filename='uploads/' ~ place.image) }}" class="img-banner" alt="{{ place.name }}">
+        <h1 class="head-text">{{ place.name }}</h1>
+        <p class="place-description">{{ place.description }}</p>
+
+        <!-- Favorite & Route Buttons -->
+        <div class="d-flex justify-content-center gap-2 mb-3">
+            <button id="favorite-btn" data-id="{{ place.id }}" class="btn {% if place in current_user.favorites %}btn-green{% else %}btn-outline-green{% endif %}">
+                {% if place in current_user.favorites %}წაშალე ფავორიტებიდან{% else %}დაამატე ფავორიტებში{% endif %}
+            </button>
+            <form method="POST">
+                <input type="hidden" name="action" value="route">
+                <button type="submit" class="btn btn-primary-green">დაამატე მარშრუტში</button>
+            </form>
+        </div>
+
+        <!-- Admin Delete Button -->
+        {% if current_user.is_admin %}
+        <form method="POST" action="{{ url_for('delete_place', place_id=place.id) }}" onsubmit="return confirm('Are you sure you want to delete this place?');">
+            <button type="submit" class="btn btn-danger mt-3">ადგილის წაშლა</button>
+        </form>
+        {% endif %}
+
+        <!-- Leaflet Map -->
+        {% if place.latitude and place.longitude %}
+        <div class="container">
+            <h3>ადგილის მდებარეობა</h3>
+            <div id="place-map"></div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Ratings & Comments -->
+    <section>
+        <h3>რეიტინგი: {{ avg_rating }} / 5</h3>
+
+        {% for rating in ratings %}
+            <div class="card mb-3" id="rating-{{ rating.id }}">
+                <div class="card-body d-flex justify-content-between align-items-start">
+                    <div>
+                        <p><strong>{{ rating.user.username }}</strong> – {{ rating.stars }} ★</p>
+                        <p>{{ rating.comment }}</p>
+                        {% if rating.image %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ rating.image) }}" class="img-fluid rounded" style="max-width:200px;">
+                        {% endif %}
+                    </div>
+
+                    {% if current_user.id == rating.user_id or current_user.is_admin %}
+                    <button class="btn btn-outline-danger btn-sm delete-comment" data-id="{{ rating.id }}" title="Delete">
+                        🗑
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+        <h4>თქვენი შეფასება</h4>
+        <form method="POST" enctype="multipart/form-data" id="rating-form">
+            <input type="hidden" name="action" value="rating">
+            <input type="hidden" name="stars" id="rating-stars" value="0">
+
+            <div class="star-rating mb-2">
+                {% for i in range(1, 6) %}
+                    <span class="star" data-value="{{ i }}">☆</span>
+                {% endfor %}
+            </div>
+
+            <div class="mb-2">
+                <label>Comment:</label>
+                <textarea name="comment" rows="3" class="form-control"></textarea>
+            </div>
+
+            <div class="mb-2">
+                <label>Upload Image:</label>
+                <input type="file" name="image" class="form-control">
+            </div>
+
+            <button type="submit" class="btn btn-success">Submit</button>
+        </form>
+    </section>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Favorite Button Toggle
+    const favoriteBtn = document.getElementById('favorite-btn');
+    if (favoriteBtn) {
+        favoriteBtn.addEventListener('click', function () {
+            const btn = this;
+            const placeId = btn.dataset.id;
+
+            fetch(`/toggle_favorite/${placeId}`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'added') {
+                        btn.textContent = 'წაშალე ფავორიტებიდან';
+                        btn.classList.remove('btn-outline-green');
+                        btn.classList.add('btn-green');
+                    } else {
+                        btn.textContent = 'დაამატე ფავორიტებში';
+                        btn.classList.remove('btn-green');
+                        btn.classList.add('btn-outline-green');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("ვერ დაემატა ფავორიტებში");
+                });
+        });
+    }
+
+    // Leaflet Map Initialization
+    {% if place.latitude and place.longitude %}
+    const map = L.map('place-map').setView([{{ place.latitude }}, {{ place.longitude }}], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.marker([{{ place.latitude }}, {{ place.longitude }}])
+        .addTo(map)
+        .bindPopup("<b>{{ place.name }}</b><br><a href='https://www.google.com/maps?q={{ place.latitude }},{{ place.longitude }}' target='_blank'>Google Maps</a>")
+        .openPopup();
+
+    // Ensure Leaflet recalculates map size
+    setTimeout(() => { map.invalidateSize(); }, 100);
+    {% endif %}
+});
+</script>
+
+<script>
+const stars = document.querySelectorAll('.star-rating .star');
+const hiddenInput = document.getElementById('rating-stars');
+
+stars.forEach(star => {
+    star.addEventListener('mouseover', () => {
+        const val = parseInt(star.dataset.value);
+        highlightStars(val);
+    });
+
+    star.addEventListener('mouseout', () => {
+        const val = parseInt(hiddenInput.value);
+        highlightStars(val);
+    });
+
+    star.addEventListener('click', () => {
+        const val = parseInt(star.dataset.value);
+        hiddenInput.value = val;
+        highlightStars(val);
+    });
+});
+
+function highlightStars(rating) {
+    stars.forEach(star => {
+        const val = parseInt(star.dataset.value);
+        if (val <= rating) {
+            star.textContent = '★';
+            star.classList.add('selected');
+        } else {
+            star.textContent = '☆';
+            star.classList.remove('selected');
+        }
+    });
+}
+</script>
+
+<script>
+document.querySelectorAll('.delete-comment').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const ratingId = btn.dataset.id;
+        if (!confirm("Are you sure you want to delete this comment?")) return;
+
+        fetch(`/delete_rating/${ratingId}`, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const commentCard = document.getElementById(`rating-${ratingId}`);
+                commentCard.remove();
+            } else {
+                alert(data.message || "Couldn't delete comment.");
+            }
+        })
+        .catch(err => console.error(err));
+    });
+});
+
+</script>
+{% endblock %}

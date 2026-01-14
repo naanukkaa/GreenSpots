@@ -1,0 +1,74 @@
+/* Smooth scroll */
+body {
+    scroll-behavior: smooth;
+}
+
+/* Hero */
+.hero-booking {
+    position: relative;
+    height: 500px;
+    color: white;
+    text-align: center;
+    padding: 210px 0;
+    overflow: hidden;
+}
+
+.hero-booking::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('../img/booking-hero.jpg') center/cover no-repeat;
+    filter: blur(8px);
+    transform: scale(1.1)
+    z-index: -1;
+}
+
+.hero-booking .container {
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero-booking h1 {
+    font-size: 70px;
+    font-weight: 700;
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+}
+
+/* Booking Form */
+.booking-form {
+    max-width: 700px;
+    margin: auto;
+    background: #fff;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.form-section {
+    margin-bottom: 30px;
+}
+
+.form-section h4 {
+    margin-bottom: 15px;
+}
+
+/* Confirm Button */
+.btn-confirm {
+    background: #3a6b4a;
+    color: #fff;
+    transition: 0.3s;
+}
+
+.btn-confirm:hover {
+    background: #2e5538;
+    color: #fff;
+}
+
+/* Booking Summary */
+.booking-summary {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}

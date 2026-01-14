@@ -1,0 +1,99 @@
+/* --- Hero Section --- */
+.hero-section {
+    opacity: 1;
+    transform: translateY(50px);
+    transition: all 0.8s ease-out;
+}
+.hero-section.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* --- Map Container --- */
+.map-container {
+    padding: 2rem 0;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.8s ease-out;
+    position: relative;
+}
+.map-container.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* --- Map Wrapper --- */
+.map-wrapper {
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* --- Map --- */
+#map {
+    width: 100%;
+    height: 85vh;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    object-fit: cover;
+}
+
+/* --- Floating Add Place Button --- */
+.add-place-btn {
+    position: absolute;
+    top: -3.2rem;
+    right: 5%;
+    width: 90%;
+    max-width: 320px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.6s ease-out;
+    height: 44px;
+    border-radius: 30px;
+}
+.add-place-btn.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* --- Card Images --- */
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* --- Leaflet popup --- */
+.leaflet-popup-content {
+    font-family: 'ALK life', sans-serif;
+}
+
+/* --- Responsive Map --- */
+@media (max-width: 1200px) {
+    #map {
+        height: 80vh;
+    }
+}
+
+@media (max-width: 769px) {
+    #map {
+        height: 70vh;
+    }
+
+    .hero-section.show{
+        height: 800px;
+    }
+}
+
+@media (max-width: 425px) {
+    #map {
+        height: 55vh;
+    }
+    .add-place-btn {
+        top: -2rem;
+        font-size: 12px;
+        height: 40px;
+    }
+}

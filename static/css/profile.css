@@ -1,0 +1,130 @@
+/* --- Global --- */
+body {
+    font-family: "ALK life", 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* --- Profile Header --- */
+.profile-header {
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.profile-header i.bi-person-circle {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.profile-header h1.hero-title {
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+    font-size: 2rem;
+}
+
+.profile-header p.hero-slogan-georgian {
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+/* --- Profile Details --- */
+.profile-details .card {
+    padding: 1rem;
+    min-height: 180px;
+}
+
+.profile-favorites-slider .slick-slide-wrapper {
+    padding: 0 10px;    /* space between slides */
+}
+
+.profile-favorites-slider {
+    margin: 0 -10px;    /* compensate for padding so first/last slides align */
+}
+
+.profile-favorites-slider .card {
+    height: 100%;
+}
+
+
+.profile-details h2 {
+    margin-bottom: 1.5rem;
+}
+
+/* --- Favorites --- */
+.profile-favorites .card-img-top {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    object-position: center;
+}
+
+.profile-favorites h2 {
+    margin-bottom: 1.5rem;
+}
+
+/* --- Planned Routes --- */
+.profile-routes .card {
+    padding: 1rem;
+}
+
+.profile-routes h2 {
+    margin-bottom: 1.5rem;
+}
+
+/* --- Cards in Row --- */
+.row.g-4 > [class*="col-"] {
+    margin-bottom: 1rem;
+}
+
+/* --- Buttons --- */
+.btn {
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .profile-header {
+        height: auto;          /* remove fixed height */
+        padding: 4rem 1rem 2rem; /* more top padding, some bottom padding */
+        text-align: center;
+    }
+
+    .profile-header i.bi-person-circle {
+        font-size: 3rem;       /* icon slightly smaller */
+        margin-bottom: 1rem;   /* space below icon */
+    }
+
+    .profile-header h1.hero-title {
+        font-size: 1.5rem;
+        margin-bottom: 40px;  /* space below heading */
+        line-height: 1.2;       /* prevents overlap */
+    }
+
+    .profile-header p.hero-slogan-georgian {
+        font-size: 0.95rem;
+        line-height: 1.5;       /* makes paragraphs readable */
+        margin-bottom: 0.5rem;  /* space before next element */
+    }
+}
+
+@media (max-width: 425px) {
+    .profile-header h1.hero-title {
+        font-size: 1.25rem;
+    }
+    .profile-header p.hero-slogan-georgian { font-size: 0.8rem; }
+
+    .profile-details .card,
+    .profile-routes .card {
+        padding: 0.75rem;
+    }
+
+    .profile-favorites .card-img-top { height: 120px; }
+
+    .btn {
+        font-size: 12px;
+        padding: 0.35rem 0.5rem;
+    }
+}

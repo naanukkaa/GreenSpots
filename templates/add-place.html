@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Add Place{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo.png') }}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 50px auto;
+        padding: 30px;
+        background-color: #f9f9f9;
+        border-radius: 12px;
+        box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+    }
+    .form-container h2 {
+        text-align: center;
+        color: #2b9348;
+        margin-bottom: 20px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        font-weight: 600;
+    }
+    .form-control {
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+    button.btn-submit {
+        background-color: #2b9348;
+        color: #fff;
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    button.btn-submit:hover {
+        background-color: #237a3d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Add New Place</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.name.label }}
+            {{ form.name(class="form-control", placeholder="ადგილის სახელი") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.description.label }}
+            {{ form.description(class="form-control", placeholder="აღწერა") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.category.label }}
+            {{ form.category(class="form-control") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.region.label }}
+            {{ form.region(class="form-control") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.image.label }}
+            {{ form.image(class="form-control") }}
+        </div>
+
+        <p id="map-warning" style="color:red; display:none; margin-bottom:10px;">
+            გთხოვ აირჩიე ადგილი რუკაზე
+        </p>
+
+        <div id="map" style="height: 350px; border-radius: 10px; margin-bottom: 15px;"></div>
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
+
+        <button type="submit" class="btn-submit" onclick="return validateMap();">
+            დაამატე ადგილი
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    const map = L.map('map').setView([41.7167, 44.7833], 7);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let marker = null;
+
+    map.on('click', function (e) {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+
+        if (marker) {
+            marker.setLatLng(e.latlng);
+        } else {
+            marker = L.marker(e.latlng).addTo(map);
+        }
+
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+
+        console.log("Saved coords:", lat, lng);
+    });
+
+    function validateMap() {
+        const lat = document.getElementById('latitude').value;
+        const lng = document.getElementById('longitude').value;
+
+        if (!lat || !lng) {
+            document.getElementById('map-warning').style.display = 'block';
+            return false;
+        }
+        return true;
+    }
+</script>
+{% endblock %}

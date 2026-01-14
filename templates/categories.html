@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}კატეგორიები — GreenSpots{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/categories.css') }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo.png') }}">
+{% endblock %}
+
+{% block content %}
+<section class="filter-section">
+    <div class="filter-container">
+
+        <!-- Filter button -->
+        <div class="filter-dropdown">
+            <button class="btn-filter" id="filter-toggle">
+                <i class="bi bi-funnel"></i> ფილტრი
+            </button>
+
+            <!-- Hidden panel -->
+            <div class="filter-panel">
+                <form class="filter-form" method="get">
+                    <select name="region" class="filter-item">
+                        <option value="">ყველა რეგიონი</option>
+                        {% for code, name in regions_list %}
+                        <option value="{{ code }}" {% if selected_region == code %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="category" class="filter-item">
+                        <option value="">ყველა კატეგორია</option>
+                        {% for category in categories_list %}
+                            <option value="{{ category }}"
+                                {% if selected_category == category %}selected{% endif %}>
+                                {{ category }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <select name="rating" class="filter-item">
+                        <option value="">ყველა შეფასება</option>
+                        <option value="5" {% if min_rating == '5' %}selected{% endif %}>5 ვარსკვლავი</option>
+                        <option value="4" {% if min_rating == '4' %}selected{% endif %}>4 ვარსკვლავი და მეტი</option>
+                        <option value="3" {% if min_rating == '3' %}selected{% endif %}>3 ვარსკვლავი და მეტი</option>
+                        <option value="2" {% if min_rating == '2' %}selected{% endif %}>2 ვარსკვლავი და მეტი</option>
+                        <option value="1" {% if min_rating == '1' %}selected{% endif %}>1 ვარსკვლავი და მეტი</option>
+                    </select>
+
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" name="favorites_only" id="favorites_only" {% if favorites_only == 'on' %}checked{% endif %}>
+                        <label for="favorites_only">მხოლოდ ფავორიტები</label>
+                    </div>
+
+                    <button type="submit" class="btn-submit">გაფილტვრა</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Search + Add Place -->
+        <div class="search-add-wrapper">
+            <form class="search-form">
+                <input type="text" name="q" class="search-input" placeholder="ძებნა ადგილების მიხედვით…" value="{{ search_query }}">
+                <button type="submit" class="btn-search"><i class="bi bi-search"></i> ძებნა</button>
+            </form>
+            <a href="{{ url_for('add_place') }}" class="btn-add-place">
+                <i class="bi bi-geo-alt"></i> დაამატე ადგილი
+            </a>
+        </div>
+
+    </div>
+</section>
+
+<!-- PLACES CARDS -->
+<section class="categories-section">
+    <div class="container">
+        <div class="row g-4">
+            {% if places %}
+                {% for place in places %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <a href="{{ url_for('place_detail', place_id=place.id) }}" class="text-decoration-none text-dark">
+                            <div class="card category-card h-100 shadow-sm">
+                                {% if place.image %}
+                                    <img src="{{ url_for('static', filename='uploads/' ~ place.image) }}" class="card-img-top" alt="{{ place.name }}">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='img/default-place.jpg') }}" class="card-img-top" alt="{{ place.name }}">
+                                {% endif %}
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ place.name }}</h5>
+                                    <p class="card-text">{{ place.description[:60] }}{% if place.description|length > 60 %}...{% endif %}</p>
+                                    <p class="text-muted">{{ place.region }}</p>
+                                    <p class="mb-0">
+                                        {% set full_stars = place.avg_rating|int %}
+                                        {% set half_star = 1 if (place.avg_rating - full_stars) >= 0.5 else 0 %}
+                                        {% set empty_stars = 5 - full_stars - half_star %}
+
+                                        {% for i in range(full_stars) %}
+                                            <i class="bi bi-star-fill text-warning"></i>
+                                        {% endfor %}
+
+                                        {% if half_star %}
+                                            <i class="bi bi-star-half text-warning"></i>
+                                        {% endif %}
+
+                                        {% for i in range(empty_stars) %}
+                                            <i class="bi bi-star text-warning"></i>
+                                        {% endfor %}
+
+                                        ({{ '%.1f' % place.avg_rating }})
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <p class="text-muted">ცარიელი შედეგი…</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block js %}
+<script>
+const toggleBtn = document.getElementById("filter-toggle");
+const filterPanel = document.querySelector(".filter-panel");
+
+toggleBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    filterPanel.classList.toggle("show");
+});
+
+// Close when clicking outside
+document.addEventListener("click", (e) => {
+    if (!filterPanel.contains(e.target) && e.target !== toggleBtn) {
+        filterPanel.classList.remove("show");
+    }
+});
+
+</script>
+{% endblock %}
+
+

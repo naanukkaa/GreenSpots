@@ -1,0 +1,66 @@
+<!-- footer.html -->
+<footer id="about">
+    <div class="footer-cta">
+        <div class="container">
+            <h2>იცით ფარული ადგილი?</h2>
+            <p>გაუზიარეთ თქვენი აღმოჩენები საზოგადოებას. დაეხმარეთ მოგზაურებს, განიცადონ ნამდვილი საქართველო.</p>
+            <a href="{{ url_for ('add_place')}}" class="btn btn-accent">
+                <i class="bi bi-geo-alt me-2"></i> დაამატეთ თქვენი ადგილი
+            </a>
+        </div>
+    </div>
+
+    <div class="footer-main">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-5 mb-4 mb-lg-0">
+                    <a href="{{ url_for('index') }}" class="footer-brand">
+                        <div class="brand-icon">
+                            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo" width="30" height="30">
+                        </div>
+                        GreenSpots
+                    </a>
+                    <p class="footer-description">
+                        საზოგადოებაზე ორიენტირებული პლატფორმა საქართველოს ულამაზესი ბუნებრივი და ისტორიული ადგილების აღმოსაჩენად.
+                    </p>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/_nanuukkaa_/" class="social-link"><i class="bi bi-instagram"></i></a>
+                        <a href="https://www.facebook.com/nanu.kupreishvili" class="social-link"><i class="bi bi-facebook"></i></a>
+                        <a href="https://tbcbank.ge/ka/tbc-education" class="social-link">
+                            <img src="{{ url_for('static', filename='img/tbc-logo.png') }}" alt="logo" width="20" height="20">
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-2 offset-lg-2">
+                    <h4 class="footer-title">აღმოაჩინე</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">კატეგორიები</a></li>
+                        <li><a href="#">დაჯავშვნა</a></li>
+                        <li><a href="{{ url_for('map_page') }}">ინტერაქტიული რუკა</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-6 col-lg-2">
+                    <h4 class="footer-title">საზოგადოება</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">ჩვენს შესახებ</a></li>
+                        <li><a href="#">კონტაქტი</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <p>© 2025 GreenSpots. ყველა უფლება დაცულია.</p>
+                <div class="d-flex gap-4">
+                    <a href="#">კონფიდენციალურობის პოლიტიკა</a>
+                    <a href="#">მომსახურების პირობები</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}დაჯავშნა — GreenSpots{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/booking.css') }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo.png') }}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<section class="hero-booking">
+    <div class="container">
+        <h1>დაგეგმე შენი თავგადასავალი</h1>
+        <p>აირჩიე ადგილი, თარიღი და შექმენი დაუვიწყარი მოგზაურობა საქართველოში</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="booking-form">
+            <form id="bookingForm" method="POST" action="{{ url_for('booking') }}">
+
+                <!-- Spot Selection -->
+                <div class="form-section">
+                    <h4>აირჩიე ადგილი</h4>
+                    <select class="form-select" id="spotSelect" name="spot" required>
+                        <option value="" disabled selected>აირჩიე...</option>
+                        {% for spot in spots %}
+                            <option value="{{ spot.name }}">{{ spot.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Date Selection -->
+                <div class="form-section">
+                    <h4>აირჩიე თარიღი</h4>
+                    <input type="date" class="form-control" id="dateInput" name="date" required>
+                </div>
+
+                <!-- Guest Info -->
+                <div class="form-section">
+                    <h4>ინფორმაცია სტუმრის შესახებ</h4>
+                    <input type="text" class="form-control mb-3" id="nameInput" name="name" placeholder="სახელი" required>
+                    <input type="email" class="form-control mb-3" id="emailInput" name="email" placeholder="ელ. ფოსტა" required>
+                    <input type="tel" class="form-control" id="phoneInput" name="phone" placeholder="ტელეფონი" required>
+                </div>
+
+                <!-- Summary -->
+                <div class="booking-summary" id="summary" style="display:none;">
+                    <h5>შეკვეთის მიმოხილვა</h5>
+                    <p><strong>ადგილი:</strong> <span id="summarySpot"></span></p>
+                    <p><strong>თარიღი:</strong> <span id="summaryDate"></span></p>
+                    <p><strong>სტუმარი:</strong> <span id="summaryName"></span></p>
+                    <p><strong>ელ. ფოსტა:</strong> <span id="summaryEmail"></span></p>
+                    <p><strong>ტელეფონი:</strong> <span id="summaryPhone"></span></p>
+                </div>
+
+                <button type="submit" class="btn btn-confirm w-100 mt-3">დადასტურება</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block js %}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- EmailJS -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script type="text/javascript">
+    emailjs.init("JU0qPiKzSmXsjH8F6");
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('bookingForm');
+    const summary = document.getElementById('summary');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('nameInput').value.trim();
+        const email = document.getElementById('emailInput').value.trim();
+        const phone = document.getElementById('phoneInput').value.trim();
+        const spot = document.getElementById('spotSelect').value;
+        const date = document.getElementById('dateInput').value;
+
+        if (!name || !email || !phone || !spot || !date) {
+            alert("გთხოვთ შეიყვანოთ ყველა აუცილებელი ველი");
+            return;
+        }
+
+        // Update summary
+        document.getElementById('summarySpot').textContent = spot;
+        document.getElementById('summaryDate').textContent = date;
+        document.getElementById('summaryName').textContent = name;
+        document.getElementById('summaryEmail').textContent = email;
+        document.getElementById('summaryPhone').textContent = phone;
+        summary.style.display = 'block';
+        summary.scrollIntoView({ behavior: "smooth" });
+
+        // Send data to backend via fetch
+        fetch("{{ url_for('booking') }}", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                spot: spot,
+                date: date,
+                name: name,
+                email: email,
+                phone: phone
+            })
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url; // redirect to profile
+            }
+
+            // Send confirmation email via EmailJS
+            const templateParams = {
+                to_name: name,
+                to_email: email,
+                spot: spot,
+                date: date,
+                phone: phone
+            };
+
+            emailjs.send('service_92mfzff', 'template_d5vie7m', templateParams)
+                .then(function(res) {
+                    console.log('Email sent', res.status, res.text);
+                }, function(err) {
+                    console.error('EmailJS error', err);
+                });
+        })
+        .catch(err => {
+            console.error(err);
+            alert("შეცდომა! გთხოვთ სცადოთ თავიდან.");
+        });
+    });
+});
+</script>
+{% endblock %}
