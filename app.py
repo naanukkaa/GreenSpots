@@ -6,11 +6,10 @@ from auth import auth_bp
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
 from sqlalchemy.sql.expression import func
-import os
 from types import SimpleNamespace
 from flask_wtf import CSRFProtect
+import os
 import random
-
 
 # ---------------- INIT APP ----------------
 app = Flask(__name__, template_folder='templates')
@@ -18,11 +17,16 @@ app.config["SECRET_KEY"] = "super-secret-key"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
-app.config['WTF_CSRF_ENABLED'] = False
+app.config['WTF_CSRF_ENABLED'] = True
 
+# ---------------- BLUEPRINTS ----------------
 app.register_blueprint(auth_bp)
+
+# ---------------- DATABASE ----------------
 db.init_app(app)
 migrate = Migrate(app, db)
+
+# ---------------- CSRF ----------------
 csrf = CSRFProtect(app)
 
 # ---------------- LOGIN MANAGER ----------------
@@ -34,21 +38,18 @@ login_manager.init_app(app)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
 # ---------------- PUBLIC ROUTES ----------------
 @app.route("/")
 def index():
     spots = Place.query.all()
-
 
     users_count = User.query.count()
     spots_count = Place.query.count()
     categories_count = 8
 
     for spot in spots:
-        if spot.ratings:
-            spot.avg_rating = round(sum(r.stars for r in spot.ratings)/len(spot.ratings), 1)
-        else:
-            spot.avg_rating = 0
+        spot.avg_rating = round(sum(r.stars for r in spot.ratings)/len(spot.ratings), 1) if spot.ratings else 0
 
     top_spots = [s for s in spots if s.avg_rating >= 4]
     random.shuffle(top_spots)
@@ -84,6 +85,8 @@ def index():
         spots_count=spots_count,
         categories_count=categories_count
     )
+
+
 # ---------------- LOGGED-IN ROUTES ----------------
 @app.route("/home")
 @login_required
@@ -91,29 +94,19 @@ def home():
     places = Place.query.all()
 
     suggested_places = random.sample(places, min(10, len(places)))
-
     for place in suggested_places:
-        if place.ratings:
-            place.avg_rating = round(sum(r.stars for r in place.ratings) / len(place.ratings), 1)
-        else:
-            place.avg_rating = 0
+        place.avg_rating = round(sum(r.stars for r in place.ratings) / len(place.ratings), 1) if place.ratings else 0
 
     user_favorites = current_user.favorites
     max_favorites = 6
-    if len(user_favorites) > max_favorites:
-        favorites_to_show = random.sample(user_favorites, max_favorites)
-
-        for fav in favorites_to_show:
-            if fav.ratings:
-                fav.avg_rating = round(sum(r.stars for r in fav.ratings) / len(fav.ratings), 1)
-            else:
-                fav.avg_rating = 0
-
-    else:
-        favorites_to_show = user_favorites
+    favorites_to_show = (
+        random.sample(user_favorites, max_favorites)
+        if len(user_favorites) > max_favorites else user_favorites
+    )
+    for fav in favorites_to_show:
+        fav.avg_rating = round(sum(r.stars for r in fav.ratings) / len(fav.ratings), 1) if fav.ratings else 0
 
     user_favorite_ids = [p.id for p in current_user.favorites]
-
     planned_count = PlannedRoute.query.filter_by(user_id=current_user.id).count()
 
     return render_template(
@@ -124,6 +117,7 @@ def home():
         user_favorite_ids=user_favorite_ids,
         planned_count=planned_count
     )
+
 
 @app.route("/profile")
 @login_required
@@ -138,11 +132,11 @@ def profile():
         avg_rating=avg_rating
     )
 
+
 @app.route("/delete_route/<int:route_id>", methods=["POST"])
 @login_required
 def delete_route(route_id):
     route = PlannedRoute.query.get_or_404(route_id)
-
     if route.user_id != current_user.id and not current_user.is_admin:
         abort(403)
 
@@ -173,6 +167,7 @@ def map_page():
     ).all()
     return render_template("map.html", places=places)
 
+
 @app.route("/categories")
 @login_required
 def categories():
@@ -200,29 +195,17 @@ def categories():
 
     places = Place.query.all()
     filtered = []
-
     for place in places:
-        avg = round(sum(r.stars for r in place.ratings)/len(place.ratings), 1) if place.ratings else 0
-        place.avg_rating = avg
+        place.avg_rating = round(sum(r.stars for r in place.ratings)/len(place.ratings), 1) if place.ratings else 0
 
-        # Rating filter
-        if min_rating:
-            if avg < float(min_rating):
-                continue
-
-        # Category filter
+        if min_rating and place.avg_rating < float(min_rating):
+            continue
         if selected_category and place.category != selected_category:
             continue
-
-        # Region filter
         if selected_region and place.region != selected_region:
             continue
-
-        # Favorites filter
         if favorites_only == "on" and place.id not in [p.id for p in current_user.favorites]:
             continue
-
-        # Search filter
         if search_query and search_query.lower() not in place.name.lower():
             continue
 
@@ -243,29 +226,24 @@ def categories():
         search_query=search_query
     )
 
+
 @app.route("/add-place", methods=["GET", "POST"])
 @login_required
 def add_place():
     form = PlaceForm()
     if form.validate_on_submit():
-        # Handle image upload
         filename = None
         if form.image.data:
             filename = secure_filename(form.image.data.filename)
-            upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            form.image.data.save(upload_path)
+            form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-        # Get coordinates from form
         latitude = request.form.get("latitude")
         longitude = request.form.get("longitude")
-
-        print("LAT:", latitude, "LNG:", longitude)
 
         if not latitude or not longitude:
             flash("გთხოვ აირჩიე ადგილი რუკაზე", "danger")
             return redirect(request.url)
 
-        # Create Place
         place = Place(
             name=form.name.data,
             description=form.description.data,
@@ -282,6 +260,7 @@ def add_place():
         return redirect(url_for("categories"))
 
     return render_template("add-place.html", form=form)
+
 
 @app.route("/place/<int:place_id>", methods=["GET", "POST"])
 @login_required
@@ -319,6 +298,7 @@ def place_detail(place_id):
     avg_rating = round(sum(r.stars for r in place.ratings)/len(place.ratings), 1) if place.ratings else 0
     return render_template("place_detail.html", place=place, ratings=place.ratings, avg_rating=avg_rating)
 
+
 @app.route("/category/<string:category_name>")
 @login_required
 def category_places(category_name):
@@ -329,6 +309,7 @@ def category_places(category_name):
         suggested_places=suggested_places,
         user_favorite_ids=user_favorite_ids
     )
+
 
 @app.route("/toggle_favorite/<int:place_id>", methods=["POST"])
 @login_required
@@ -347,6 +328,7 @@ def toggle_favorite(place_id):
         db.session.rollback()
         return {"status": "error", "message": str(e)}, 500
 
+
 @app.route('/booking', methods=['GET', 'POST'])
 @login_required
 def booking():
@@ -359,13 +341,11 @@ def booking():
         email = request.form['email']
         phone = request.form['phone']
 
-        # Find the Spot in DB
         spot = Place.query.filter_by(name=spot_name).first()
         if not spot:
             flash("აირჩიე ვალიდური ადგილი!", "danger")
             return redirect(url_for('booking'))
 
-        # Save the booking to PlannedRoute
         new_route = PlannedRoute(
             user_id=current_user.id,
             place_id=spot.id,
@@ -383,7 +363,7 @@ def booking():
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "POST":
-        name = request.form["   name"]
+        name = request.form["name"]
         email = request.form["email"]
         subject = request.form["subject"]
         message = request.form["message"]
@@ -394,6 +374,7 @@ def contact():
     return render_template("contact.html")
 
 
+# ---------------- RUN ----------------
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

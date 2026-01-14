@@ -36,7 +36,7 @@
             {% for place in suggested_places %}
             <div>
                 <div class="card h-100 shadow-sm">
-                    <img src="{{ url_for('static', filename='uploads/' + place.image) }}" class="card-img-top" alt="{{ place.name }}">
+                    <img src="{{ url_for('static', filename='uploads/' ~ (place.image or 'placeholder.png')) }}" class="card-img-top" alt="{{ place.name }}">
                     <div class="card-body">
                         <h5 class="card-title">{{ place.name }}</h5>
                         <p class="card-text">{{ place.description }}</p>
@@ -197,4 +197,15 @@ $('.suggested-slider').slick({
 });
 </script>
 
+<script>
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+fetch(`/toggle_favorite/${placeId}`, {
+    method: "POST",
+    headers: {
+        "X-CSRFToken": csrfToken,
+        "Content-Type": "application/json"
+    }
+})
+
+</script>
 {%endblock%}
