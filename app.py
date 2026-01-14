@@ -283,23 +283,6 @@ def add_place():
 
     return render_template("add-place.html", form=form)
 
-
-@app.route('/delete_rating/<int:rating_id>', methods=['POST'])
-@login_required
-def delete_rating(rating_id):
-    rating = Rating.query.get_or_404(rating_id)
-
-    if rating.user_id != current_user.id and not current_user.is_admin:
-        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
-
-    try:
-        db.session.delete(rating)
-        db.session.commit()
-        return jsonify({'status': 'success'})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
 @app.route("/place/<int:place_id>", methods=["GET", "POST"])
 @login_required
 def place_detail(place_id):
@@ -351,15 +334,18 @@ def category_places(category_name):
 @login_required
 def toggle_favorite(place_id):
     place = Place.query.get_or_404(place_id)
-    if place in current_user.favorites:
-        current_user.favorites.remove(place)
+    try:
+        if place in current_user.favorites:
+            current_user.favorites.remove(place)
+            status = "removed"
+        else:
+            current_user.favorites.append(place)
+            status = "added"
         db.session.commit()
-        return {"status": "removed"}
-    else:
-        current_user.favorites.append(place)
-        db.session.commit()
-        return {"status": "added"}
-
+        return {"status": status}
+    except Exception as e:
+        db.session.rollback()
+        return {"status": "error", "message": str(e)}, 500
 
 @app.route('/booking', methods=['GET', 'POST'])
 @login_required
