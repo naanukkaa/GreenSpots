@@ -149,7 +149,7 @@ def home():
 @app.route("/profile")
 @login_required
 def profile():
-    favorites = current_user.favorites
+    favorites = current_user.favorites.all()  # Add .all() here!
     planned_routes = PlannedRoute.query.filter_by(user_id=current_user.id).all()
     my_places = Place.query.filter_by(user_id=current_user.id).all()
     avg_rating = current_user.calculate_avg_rating()

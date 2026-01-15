@@ -98,8 +98,9 @@
               <div class="card p-3 h-100 mx-2">
                   <h5>{{ route.name }}</h5>
                   <p>გეგმაში: {{ route.date.strftime('%d %B') }} – {{ route.place.name }}</p>
-                  <form action="{{ url_for('delete_route', route_id=route.id) }}" method="POST" onsubmit="return confirm('გსურთ წაშლა?');">
-                      <button type="submit" class="btn btn-outline-green">წაშლა</button>
+                  <form method="POST" action="{{ url_for('delete_route', route_id=route.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-danger btn-sm">წაშლა</button>
                   </form>
               </div>
             {% endfor %}
