@@ -14,12 +14,11 @@ import random
 # ---------------- INIT APP ----------------
 app = Flask(__name__, template_folder='templates')
 app.config["SECRET_KEY"] = "super-secret-key"
-db_url = os.environ.get("DATABASE_URL",
-    "postgresql://database_zwh7_user:KGNKbpdqqLwAuwu8irdfzeE1EcFaws18@dpg-d5jpsv7fte5s738r7tpg-a/database_zwh7"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+    "postgresql://database_zwh7_user:KGNKbpdqqLwAuwu8irdfzeE1EcFaws18@dpg-d5jpsv7fte5s738r7tpg-a/database_zwh7",
+    "sqlite:///database.db"  # fallback for local dev
 )
-if db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
-app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.config['WTF_CSRF_ENABLED'] = True
@@ -156,16 +155,14 @@ def delete_route(route_id):
 @app.route("/delete_place/<int:place_id>", methods=["POST"])
 @login_required
 def delete_place(place_id):
-    place = Place.query.get_or_404(place_id)
-
-    # Only allow deletion if current user is admin OR owner of the place
-    if not current_user.is_admin and place.user_id != current_user.id:
+    if not current_user.is_admin:
         abort(403)
 
+    place = Place.query.get_or_404(place_id)
     db.session.delete(place)
     db.session.commit()
-    flash("Place deleted successfully!", "success")
-    return redirect(url_for("profile"))  # or "categories" if you prefer
+    flash("Place deleted", "success")
+    return redirect(url_for("categories"))
 
 
 @app.route("/map")
@@ -253,7 +250,6 @@ def add_place():
             flash("გთხოვ აირჩიე ადგილი რუკაზე", "danger")
             return redirect(request.url)
 
-        # Create Place and assign the current user as owner
         place = Place(
             name=form.name.data,
             description=form.description.data,
@@ -261,8 +257,7 @@ def add_place():
             region=form.region.data,
             image=filename,
             latitude=float(latitude),
-            longitude=float(longitude),
-            user_id=current_user.id  # <- crucial for PostgreSQL foreign key
+            longitude=float(longitude)
         )
 
         db.session.add(place)
@@ -271,7 +266,6 @@ def add_place():
         return redirect(url_for("categories"))
 
     return render_template("add-place.html", form=form)
-
 
 
 @app.route("/place/<int:place_id>", methods=["GET", "POST"])
