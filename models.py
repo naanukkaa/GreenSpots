@@ -17,14 +17,22 @@ planned_routes_table = db.Table('planned_routes',
     db.Column('place_id', db.Integer, db.ForeignKey('place.id'), primary_key=True)
 )
 
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)  # <-- updated
-    favorites = db.relationship('Place', secondary=favorites_table, backref=db.backref('favorited_by', lazy='select'))
+    password_hash = db.Column(db.String(200), nullable=False)
 
-    role = db.Column(db.String(50), default="user")  # optional
+    # Fixed favorites relationship
+    favorites = db.relationship(
+        'Place',
+        secondary=favorites_table,
+        lazy='select',  # Changed from default
+        backref=db.backref('favorited_by', lazy='select')
+    )
+
+    role = db.Column(db.String(50), default="user")
     is_admin = db.Column(db.Boolean, default=False)
 
     def set_password(self, password):
@@ -36,9 +44,13 @@ class User(UserMixin, db.Model):
     def calculate_avg_rating(self):
         if not self.favorites:
             return 0
-        total = sum(place.rating for place in self.favorites if hasattr(place, 'rating'))
-        count = sum(1 for place in self.favorites if hasattr(place, 'rating'))
-        return round(total / count, 1) if count else 0
+        # Calculate based on the ratings of favorited places
+        total_ratings = []
+        for place in self.favorites:
+            if place.ratings:
+                avg = sum(r.stars for r in place.ratings) / len(place.ratings)
+                total_ratings.append(avg)
+        return round(sum(total_ratings) / len(total_ratings), 1) if total_ratings else 0
 
 class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -58,13 +70,13 @@ class Place(db.Model):
     longitude = db.Column(db.Float, nullable=True)
     rating = db.Column(db.Float)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    # Remove or make nullable if places aren't owned by users
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
     ratings = db.relationship('Rating', backref='place', lazy=True)
 
     def __repr__(self):
         return f"<Place {self.name}>"
-
 
 class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -75,13 +87,6 @@ class Rating(db.Model):
     image = db.Column(db.String(200))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', backref='ratings')
-
-class Favorite(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    place_id = db.Column(db.Integer, db.ForeignKey("place.id"))
-    place = db.relationship("Place")
-
 
 class Spot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
