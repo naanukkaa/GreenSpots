@@ -13,8 +13,14 @@ import random
 
 # ---------------- INIT APP ----------------
 app = Flask(__name__, template_folder='templates')
-app.config["SECRET_KEY"] = "super-secret-key"
 
+# Environment detection
+IS_PRODUCTION = os.environ.get('RENDER') is not None
+
+# Secret Key
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "super-secret-key")
+
+# Database
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL",
     "sqlite:///database.db"
@@ -26,8 +32,19 @@ if uri and uri.startswith("postgres://"):
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
-app.config['WTF_CSRF_ENABLED'] = True
 
+# CSRF Configuration
+app.config['WTF_CSRF_ENABLED'] = True
+if IS_PRODUCTION:
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['WTF_CSRF_SSL_STRICT'] = False
+    app.config['WTF_CSRF_TIME_LIMIT'] = None
+
+# Proxy Fix for Render
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # ---------------- BLUEPRINTS ----------------
 app.register_blueprint(auth_bp)
