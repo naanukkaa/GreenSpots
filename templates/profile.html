@@ -71,20 +71,23 @@
         <h2 class="mb-4">თქვენი ფავორიტები</h2>
         <div class="favorites-slider">
             {% for place in favorites %}
-            <div class="card h-100 mx-2">
+            <div class="card h-100 mx-2" id="favorite-{{ place.id }}">
                 <img src="{{ url_for('static', filename='uploads/' ~ place.image) }}" class="card-img-top" alt="{{ place.name }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ place.name }}</h5>
-                    <form action="{{ url_for('toggle_favorite', place_id=place.id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
-                        {{ csrf_token() }}
-                        <button type="submit" class="btn btn-danger btn-sm mt-2">წაშლა</button>
-                    </form>
+                    <!-- Use button instead of form -->
+                    <button
+                        onclick="toggleFavorite({{ place.id }})"
+                        class="btn btn-danger btn-sm mt-2">
+                        წაშლა
+                    </button>
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
 </section>
+
 
 <!-- Planned Routes Slider -->
 <section class="profile-routes py-5">
@@ -125,6 +128,56 @@
 <!-- Slick JS -->
 <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 <script>
+// CSRF Token helper
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || '';
+}
+
+// Toggle favorite with AJAX
+function toggleFavorite(placeId) {
+    if (!confirm('Are you sure?')) return;
+
+    fetch(`/toggle_favorite/${placeId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'removed') {
+            // Remove the card with animation
+            const card = document.getElementById(`favorite-${placeId}`);
+            card.style.opacity = '0';
+            setTimeout(() => {
+                card.remove();
+                // Refresh slick slider
+                $('.favorites-slider').slick('unslick');
+                $('.favorites-slider').slick({
+                    slidesToShow: 4,
+                    slidesToScroll: 1,
+                    autoplay: true,
+                    autoplaySpeed: 2500,
+                    arrows: true,
+                    dots: true,
+                    infinite: true,
+                    pauseOnHover: true,
+                    responsive: [
+                        { breakpoint: 1024, settings: { slidesToShow: 3 } },
+                        { breakpoint: 768, settings: { slidesToShow: 2 } },
+                        { breakpoint: 480, settings: { slidesToShow: 1 } }
+                    ]
+                });
+            }, 300);
+        }
+    })
+    .catch(error => {
+        alert('შეცდომა დაფიქსირდა!');
+        console.error('Error:', error);
+    });
+}
+
 $(document).ready(function(){
     // Favorites slider
     $('.favorites-slider').slick({
@@ -161,3 +214,4 @@ $(document).ready(function(){
 });
 </script>
 {% endblock %}
+

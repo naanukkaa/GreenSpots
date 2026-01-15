@@ -14,14 +14,20 @@ import random
 # ---------------- INIT APP ----------------
 app = Flask(__name__, template_folder='templates')
 app.config["SECRET_KEY"] = "super-secret-key"
+
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    "postgresql://database_zwh7_user:KGNKbpdqqLwAuwu8irdfzeE1EcFaws18@dpg-d5jpsv7fte5s738r7tpg-a/database_zwh7",
-    "sqlite:///database.db"  # fallback for local dev
+    "DATABASE_URL",
+    "sqlite:///database.db"
 )
+uri = app.config["SQLALCHEMY_DATABASE_URI"]
+if uri and uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = uri
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.config['WTF_CSRF_ENABLED'] = True
+
 
 # ---------------- BLUEPRINTS ----------------
 app.register_blueprint(auth_bp)
@@ -324,15 +330,20 @@ def toggle_favorite(place_id):
     try:
         if place in current_user.favorites:
             current_user.favorites.remove(place)
-            status = "removed"
+            flash("ადგილი წაიშალა ფავორიტებიდან", "success")
         else:
             current_user.favorites.append(place)
-            status = "added"
+            flash("ადგილი დაემატა ფავორიტებში", "success")
+
         db.session.commit()
-        return {"status": status}
+
+        # ✅ Return redirect instead of JSON
+        return redirect(url_for('profile'))
+
     except Exception as e:
         db.session.rollback()
-        return {"status": "error", "message": str(e)}, 500
+        flash(f"შეცდომა: {str(e)}", "danger")
+        return redirect(url_for('profile'))
 
 
 @app.route('/booking', methods=['GET', 'POST'])
