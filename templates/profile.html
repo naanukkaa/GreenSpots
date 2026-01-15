@@ -75,12 +75,12 @@
                 <img src="{{ url_for('static', filename='uploads/' ~ place.image) }}" class="card-img-top" alt="{{ place.name }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ place.name }}</h5>
-                    <!-- Use button instead of form -->
-                    <button
-                        onclick="toggleFavorite({{ place.id }})"
-                        class="btn btn-danger btn-sm mt-2">
-                        წაშლა
-                    </button>
+                    <form method="POST" action="{{ url_for('toggle_favorite', place_id=place.id) }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <button type="submit" class="btn btn-danger btn-sm mt-2">
+                            წაშლა
+                        </button>
+                    </form>
                 </div>
             </div>
             {% endfor %}
@@ -128,22 +128,31 @@
 <!-- Slick JS -->
 <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 <script>
-// CSRF Token helper
-function getCsrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content || '';
-}
-
-// Toggle favorite with AJAX
-function toggleFavorite(placeId) {
-    if (!confirm('Are you sure?')) return;
+    function toggleFavorite(placeId) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
     fetch(`/toggle_favorite/${placeId}`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken()
+            'X-CSRFToken': csrfToken,  // ← This is the key line
+            'Content-Type': 'application/json'
         }
     })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else if (response.ok) {
+            // Optionally remove the card from UI
+            document.getElementById(`favorite-${placeId}`)?.remove();
+        } else {
+            alert('შეცდომა მოხდა');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('შეცდომა მოხდა');
+    });
+}
     .then(response => response.json())
     .then(data => {
         if (data.status === 'removed') {
@@ -177,7 +186,8 @@ function toggleFavorite(placeId) {
         console.error('Error:', error);
     });
 }
-
+</script>
+<script>
 $(document).ready(function(){
     // Favorites slider
     $('.favorites-slider').slick({
