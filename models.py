@@ -58,6 +58,8 @@ class Place(db.Model):
     longitude = db.Column(db.Float, nullable=True)
     rating = db.Column(db.Float)
 
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
     ratings = db.relationship('Rating', backref='place', lazy=True)
 
     def __repr__(self):

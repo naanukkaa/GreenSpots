@@ -84,11 +84,10 @@
         </div>
 
         <!-- Admin Delete Button -->
-        {% if current_user.is_admin %}
-        <form method="POST" action="{{ url_for('delete_place', place_id=place.id) }}" onsubmit="return confirm('Are you sure you want to delete this place?');">
-            <button type="submit" class="btn btn-danger mt-3">ადგილის წაშლა</button>
+       <form action="{{ url_for('delete_place', place_id=place.id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
+            {{ csrf_token() }}
+            <button type="submit" class="btn btn-danger btn-sm mt-2">წაშლა</button>
         </form>
-        {% endif %}
 
         <!-- Leaflet Map -->
         {% if place.latitude and place.longitude %}

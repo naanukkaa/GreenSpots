@@ -14,7 +14,7 @@ import random
 # ---------------- INIT APP ----------------
 app = Flask(__name__, template_folder='templates')
 app.config["SECRET_KEY"] = "super-secret-key"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+app.config["DATABASE_URL"] = "postgresql://database_zwh7_user:KGNKbpdqqLwAuwu8irdfzeE1EcFaws18@dpg-d5jpsv7fte5s738r7tpg-a/database_zwh7"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.config['WTF_CSRF_ENABLED'] = True
@@ -124,11 +124,13 @@ def home():
 def profile():
     favorites = current_user.favorites
     planned_routes = PlannedRoute.query.filter_by(user_id=current_user.id).all()
+    my_places = Place.query.filter_by(user_id=current_user.id).all()
     avg_rating = current_user.calculate_avg_rating()
     return render_template(
         "profile.html",
         favorites=favorites,
         planned_routes=planned_routes,
+        my_places=my_places,
         avg_rating=avg_rating
     )
 
