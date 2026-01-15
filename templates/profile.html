@@ -48,25 +48,17 @@
 </section>
 
 <section>
+    <h3>My Places</h3>
     <div class="my-places">
         {% for place in my_places %}
             <div class="place-card">
-                <img src="{{ url_for('static', filename='uploads/' ~ place.image) }}" alt="">
-
+                <img src="{{ url_for('static', filename='uploads/' ~ place.image) }}" alt="{{ place.name }}">
                 <div class="place-info">
                     <h5>{{ place.name }}</h5>
-
-                    {% if current_user.is_admin or place.user_id == current_user.id %}
-                    <form method="POST"
-                          action="{{ url_for('delete_place', place_id=place.id) }}"
-                          onsubmit="return confirm('დარწმუნებული ხარ?');"
-                          class="delete-form">
+                    <form method="POST" action="{{ url_for('delete_place', place_id=place.id) }}" onsubmit="return confirm('დარწმუნებული ხარ?');">
                         {{ csrf_token() }}
-                        <button type="submit" class="btn btn-danger btn-sm">
-                            წაშლა
-                        </button>
+                        <button type="submit" class="btn btn-danger btn-sm">წაშლა</button>
                     </form>
-                    {% endif %}
                 </div>
             </div>
         {% endfor %}
