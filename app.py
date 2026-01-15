@@ -13,38 +13,15 @@ import random
 
 # ---------------- INIT APP ----------------
 app = Flask(__name__, template_folder='templates')
-
-# Environment detection
-IS_PRODUCTION = os.environ.get('RENDER') is not None
-
-# Secret Key
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "super-secret-key")
-
-# Database
+app.config["SECRET_KEY"] = "super-secret-key"
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    "DATABASE_URL",
-    "sqlite:///database.db"
+    "postgresql://database_zwh7_user:KGNKbpdqqLwAuwu8irdfzeE1EcFaws18@dpg-d5jpsv7fte5s738r7tpg-a/database_zwh7",
+    "sqlite:///database.db"  # fallback for local dev
 )
-uri = app.config["SQLALCHEMY_DATABASE_URI"]
-if uri and uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://", 1)
-    app.config["SQLALCHEMY_DATABASE_URI"] = uri
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
-
-# CSRF Configuration
 app.config['WTF_CSRF_ENABLED'] = True
-if IS_PRODUCTION:
-    app.config['SESSION_COOKIE_SECURE'] = True
-    app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-    app.config['WTF_CSRF_SSL_STRICT'] = False
-    app.config['WTF_CSRF_TIME_LIMIT'] = None
-
-# Proxy Fix for Render
-from werkzeug.middleware.proxy_fix import ProxyFix
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # ---------------- BLUEPRINTS ----------------
 app.register_blueprint(auth_bp)
@@ -149,7 +126,7 @@ def home():
 @app.route("/profile")
 @login_required
 def profile():
-    favorites = current_user.favorites.all()  # Add .all() here!
+    favorites = current_user.favorites
     planned_routes = PlannedRoute.query.filter_by(user_id=current_user.id).all()
     my_places = Place.query.filter_by(user_id=current_user.id).all()
     avg_rating = current_user.calculate_avg_rating()
@@ -347,20 +324,15 @@ def toggle_favorite(place_id):
     try:
         if place in current_user.favorites:
             current_user.favorites.remove(place)
-            flash("ადგილი წაიშალა ფავორიტებიდან", "success")
+            status = "removed"
         else:
             current_user.favorites.append(place)
-            flash("ადგილი დაემატა ფავორიტებში", "success")
-
+            status = "added"
         db.session.commit()
-
-        # ✅ Return redirect instead of JSON
-        return redirect(url_for('profile'))
-
+        return {"status": status}
     except Exception as e:
         db.session.rollback()
-        flash(f"შეცდომა: {str(e)}", "danger")
-        return redirect(url_for('profile'))
+        return {"status": "error", "message": str(e)}, 500
 
 
 @app.route('/booking', methods=['GET', 'POST'])
@@ -407,13 +379,6 @@ def contact():
 
     return render_template("contact.html")
 
-
-with app.app_context():
-    try:
-        db.create_all()
-        print("Database tables created successfully")
-    except Exception as e:
-        print(f"Error creating tables: {e}")
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":

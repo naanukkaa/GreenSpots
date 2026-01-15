@@ -12,16 +12,19 @@ favorites_table = db.Table(
 )
 
 
+planned_routes_table = db.Table('planned_routes',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('place_id', db.Integer, db.ForeignKey('place.id'), primary_key=True)
+)
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)  # <-- updated
+    favorites = db.relationship('Place', secondary=favorites_table, backref=db.backref('favorited_by', lazy='select'))
 
-    # Keep this simple - it works
-    favorites = db.relationship('Place', secondary=favorites_table, backref='favorited_by', lazy='dynamic')
-
-    role = db.Column(db.String(50), default="user")
+    role = db.Column(db.String(50), default="user")  # optional
     is_admin = db.Column(db.Boolean, default=False)
 
     def set_password(self, password):
@@ -31,15 +34,17 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def calculate_avg_rating(self):
-        favs = self.favorites.all()  # Important: use .all() with lazy='dynamic'
-        if not favs:
+        if not self.favorites:
             return 0
-        total_ratings = []
-        for place in favs:
-            if place.ratings:
-                avg = sum(r.stars for r in place.ratings) / len(place.ratings)
-                total_ratings.append(avg)
-        return round(sum(total_ratings) / len(total_ratings), 1) if total_ratings else 0
+        total = sum(place.rating for place in self.favorites if hasattr(place, 'rating'))
+        count = sum(1 for place in self.favorites if hasattr(place, 'rating'))
+        return round(total / count, 1) if count else 0
+
+class Route(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
 class Place(db.Model):
@@ -53,8 +58,6 @@ class Place(db.Model):
     longitude = db.Column(db.Float, nullable=True)
     rating = db.Column(db.Float)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Made nullable
-
     ratings = db.relationship('Rating', backref='place', lazy=True)
 
     def __repr__(self):
@@ -65,14 +68,12 @@ class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     place_id = db.Column(db.Integer, db.ForeignKey('place.id'))
-    stars = db.Column(db.Float, nullable=False)
+    stars = db.Column(db.Float, nullable=False)  # 0–5 scale
     comment = db.Column(db.Text)
     image = db.Column(db.String(200))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', backref='ratings')
 
-
-# Keep this for now - don't delete yet to avoid breaking existing data
 class Favorite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
@@ -90,7 +91,6 @@ class Spot(db.Model):
     badges = db.Column(db.String(150))
     lat = db.Column(db.Float)
     lng = db.Column(db.Float)
-
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
