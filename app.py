@@ -5,6 +5,7 @@ from forms import PlaceForm
 from auth import auth_bp
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
+from app import db
 from sqlalchemy.sql.expression import func
 from types import SimpleNamespace
 from flask_wtf import CSRFProtect
@@ -122,14 +123,22 @@ def home():
         planned_count=planned_count
     )
 
-
 @app.route("/profile")
 @login_required
 def profile():
-    favorites = current_user.favorites
-    planned_routes = PlannedRoute.query.filter_by(user_id=current_user.id).all()
-    my_places = Place.query.filter_by(user_id=current_user.id).all()
-    avg_rating = current_user.calculate_avg_rating()
+    try:
+        favorites = current_user.favorites or []
+    except Exception:
+        favorites = []
+
+    try:
+        avg_rating = current_user.calculate_avg_rating()
+    except Exception:
+        avg_rating = 0
+
+    planned_routes = PlannedRoute.query.filter(PlannedRoute.user_id == current_user.id).all()
+    my_places = Place.query.filter(Place.user_id == current_user.id).all()
+
     return render_template(
         "profile.html",
         favorites=favorites,
@@ -137,7 +146,6 @@ def profile():
         my_places=my_places,
         avg_rating=avg_rating
     )
-
 
 @app.route("/delete_route/<int:route_id>", methods=["POST"])
 @login_required

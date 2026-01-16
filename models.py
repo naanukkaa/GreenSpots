@@ -36,8 +36,8 @@ class User(UserMixin, db.Model):
     def calculate_avg_rating(self):
         if not self.favorites:
             return 0
-        total = sum(place.rating for place in self.favorites if hasattr(place, 'rating'))
-        count = sum(1 for place in self.favorites if hasattr(place, 'rating'))
+        total = sum(place.rating for place in self.favorites if getattr(place, 'rating', 0))
+        count = sum(1 for place in self.favorites if getattr(place, 'rating', 0) is not None)
         return round(total / count, 1) if count else 0
 
 class Route(db.Model):
@@ -57,6 +57,8 @@ class Place(db.Model):
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
     rating = db.Column(db.Float)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref='places')
 
     ratings = db.relationship('Rating', backref='place', lazy=True)
 
