@@ -4,6 +4,7 @@ from wtforms import (StringField, PasswordField, SubmitField, TextAreaField, Flo
 from wtforms.validators import DataRequired, Email, Length
 from wtforms import StringField, PasswordField, SubmitField, EmailField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
+from models import User
 ALLOWED_EMAIL_DOMAINS = {
     "gmail.com",
     "outlook.com",
@@ -26,9 +27,25 @@ def validate_email_domain(form, field):
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email(message="Invalid email format"), validate_email_domain])
+    email = StringField('Email', validators=[
+        DataRequired(),
+        Email(message="Invalid email format"),
+        validate_email_domain
+    ])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
+
+    def validate_username(self, username):
+        from models import User # Local import to avoid circular imports if necessary
+        user = User.query.filter_by(username=username.data).first()
+        if user:
+            raise ValidationError('ეს მომხმარებლის სახელი უკვე დაკავებულია.')
+
+    def validate_email(self, email):
+        from models import User
+        user = User.query.filter_by(email=email.data).first()
+        if user:
+            raise ValidationError('ეს ელ-ფოსტა უკვე გამოყენებულია.')
 
 
 class LoginForm(FlaskForm):

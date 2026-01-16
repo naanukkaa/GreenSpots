@@ -41,7 +41,7 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 # ---------------- PUBLIC ROUTES ----------------
@@ -126,6 +126,7 @@ def home():
 @app.route("/profile")
 @login_required
 def profile():
+    my_places = Place.query.filter_by(user_id=current_user.id).all()
     try:
         favorites = current_user.favorites or []
     except Exception:
@@ -137,7 +138,6 @@ def profile():
         avg_rating = 0
 
     planned_routes = PlannedRoute.query.filter(PlannedRoute.user_id == current_user.id).all()
-    my_places = Place.query.filter(Place.user_id == current_user.id).all()
 
     return render_template(
         "profile.html",
@@ -185,52 +185,62 @@ def map_page():
 @app.route("/categories")
 @login_required
 def categories():
+    # Get current page from URL (default is 1)
+    page = request.args.get('page', 1, type=int)
+    per_page = 20  # <--- HERE IS YOUR LIMIT
+
     search_query = request.args.get("q", "").strip()
     selected_category = request.args.get("category", "").strip()
     min_rating = request.args.get("rating", "").strip()
     selected_region = request.args.get("region", "").strip()
     favorites_only = request.args.get("favorites_only", "").strip()
 
-    region_map = {
-        "Tbilisi": "თბილისი",
-        "Adjara": "აჭარა",
-        "Abkhazia": "აფხაზეთი",
-        "Samegrelo": "სამეგრელო",
-        "Guria": "გურია",
-        "Imereti": "იმერეთი",
-        "Kakheti": "კახეთი",
-        "Racha-Lechkhumi": "რაჭა-ლეჩხუმი",
-        "Mtskheta-Mtianeti": "მცხეთა-მთიანეთი",
-        "Samtskhe-Javakheti": "სამცხე-ჯავახეთი",
-        "Svaneti": "სვანეთი",
-        "Shida Kartli": "შიდა ქართლი",
-        "Kvemo Kartli": "ქვემო ქართლი"
-    }
+    # Start the query
+    query = Place.query
 
-    places = Place.query.all()
-    filtered = []
-    for place in places:
-        place.avg_rating = round(sum(r.stars for r in place.ratings)/len(place.ratings), 1) if place.ratings else 0
+    # Apply filters in the database
+    if selected_category:
+        query = query.filter(Place.category == selected_category)
+    if selected_region:
+        query = query.filter(Place.region == selected_region)
+    if search_query:
+        query = query.filter(Place.name.ilike(f"%{search_query}%"))
+    if favorites_only == "on":
+        query = query.filter(Place.id.in_([p.id for p in current_user.favorites]))
 
+    # Ratings filter is tricky because it's a calculated field.
+    # For now, we fetch all filtered, calculate avg, then paginate.
+    all_filtered = query.all()
+
+    final_list = []
+    for place in all_filtered:
+        place.avg_rating = round(sum(r.stars for r in place.ratings) / len(place.ratings), 1) if place.ratings else 0
         if min_rating and place.avg_rating < float(min_rating):
             continue
-        if selected_category and place.category != selected_category:
-            continue
-        if selected_region and place.region != selected_region:
-            continue
-        if favorites_only == "on" and place.id not in [p.id for p in current_user.favorites]:
-            continue
-        if search_query and search_query.lower() not in place.name.lower():
-            continue
+        final_list.append(place)
 
-        filtered.append(place)
+    # Manual Pagination for the list
+    total = len(final_list)
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_places = final_list[start:end]
 
+    # Calculate total pages
+    total_pages = (total + per_page - 1) // per_page
+
+    # Helpers for the filter dropdowns
     categories_list = [c[0] for c in db.session.query(Place.category).distinct()]
-    regions_list = [(code, name) for code, name in region_map.items() if any(p.region == code for p in places)]
+    region_map = {"Tbilisi": "თბილისი", "Adjara": "აჭარა", "Abkhazia": "აფხაზეთი", "Samegrelo": "სამეგრელო",
+                  "Guria": "გურია", "Imereti": "იმერეთი", "Kakheti": "კახეთი", "Racha-Lechkhumi": "რაჭა-ლეჩხუმი",
+                  "Mtskheta-Mtianeti": "მცხეთა-მთიანეთი", "Samtskhe-Javakheti": "სამცხე-ჯავახეთი", "Svaneti": "სვანეთი",
+                  "Shida Kartli": "შიდა ქართლი", "Kvemo Kartli": "ქვემო ქართლი"}
+    regions_list = [(code, name) for code, name in region_map.items()]
 
     return render_template(
         "categories.html",
-        places=filtered,
+        places=paginated_places,
+        page=page,
+        total_pages=total_pages,
         categories_list=categories_list,
         regions_list=regions_list,
         selected_category=selected_category,
@@ -239,7 +249,6 @@ def categories():
         favorites_only=favorites_only,
         search_query=search_query
     )
-
 
 @app.route("/add-place", methods=["GET", "POST"])
 @login_required
@@ -265,7 +274,8 @@ def add_place():
             region=form.region.data,
             image=filename,
             latitude=float(latitude),
-            longitude=float(longitude)
+            longitude=float(longitude),
+            user_id = current_user.id
         )
 
         db.session.add(place)
@@ -328,7 +338,11 @@ def category_places(category_name):
 @app.route("/toggle_favorite/<int:place_id>", methods=["POST"])
 @login_required
 def toggle_favorite(place_id):
-    place = Place.query.get_or_404(place_id)
+    # Modern SQLAlchemy 2.0 way
+    place = db.session.get(Place, place_id)
+    if not place:
+        return jsonify({"status": "error", "message": "Place not found"}), 404
+
     try:
         if place in current_user.favorites:
             current_user.favorites.remove(place)
@@ -337,11 +351,10 @@ def toggle_favorite(place_id):
             current_user.favorites.append(place)
             status = "added"
         db.session.commit()
-        return {"status": status}
+        return jsonify({"status": status})
     except Exception as e:
         db.session.rollback()
-        return {"status": "error", "message": str(e)}, 500
-
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/booking', methods=['GET', 'POST'])
 @login_required
@@ -387,6 +400,19 @@ def contact():
 
     return render_template("contact.html")
 
+
+@app.route("/delete_rating/<int:rating_id>", methods=["POST"])
+@login_required
+def delete_rating(rating_id):
+    rating = Rating.query.get_or_404(rating_id)
+
+    # Check if the user is the owner or an admin
+    if rating.user_id != current_user.id and not current_user.is_admin:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 403
+
+    db.session.delete(rating)
+    db.session.commit()
+    return jsonify({"status": "success"})
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":

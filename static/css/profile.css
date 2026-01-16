@@ -85,6 +85,9 @@ html {
     margin-top: 0.5rem;
 }
 
+.added-locs{
+    margin-left: 110px;
+}
 .my-places {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

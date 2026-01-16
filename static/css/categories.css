@@ -168,6 +168,37 @@
     display: flex;
 }
 
+/* Pagination Styling with your Theme Vars */
+.pagination {
+    gap: 5px;
+}
+
+.pagination .page-link {
+    background-color: var(--sand-100);
+    color: var(--forest-600);
+    border: 1px solid var(--forest-200);
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.pagination .page-link:hover {
+    background-color: var(--forest-100);
+    color: var(--forest-800);
+    border-color: var(--forest-400);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--accent); /* Your gold color */
+    border-color: var(--accent);
+    color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: var(--sand-50);
+    color: var(--forest-200);
+    border-color: var(--forest-100);
+    opacity: 0.6;
+}
 
 /* --- Responsive Mobile ≤425px --- */
 @media (max-width: 425px) {

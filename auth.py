@@ -14,28 +14,33 @@ def register():
     form = RegistrationForm()
 
     if form.validate_on_submit():
-        existing_user = User.query.filter(
-            (User.username == form.username.data) | (User.email == form.email.data)
-        ).first()
-        if existing_user:
-            flash('Username or email already exists.', 'danger')
+        # Check Username separately
+        user_by_username = User.query.filter_by(username=form.username.data).first()
+        if user_by_username:
+            flash('ეს მომხმარებლის სახელი უკვე დაკავებულია.', 'danger')
             return redirect(url_for('auth_bp.register'))
 
+        # Check Email separately
+        user_by_email = User.query.filter_by(email=form.email.data).first()
+        if user_by_email:
+            flash('ეს ელ-ფოსტა უკვე გამოყენებულია.', 'danger')
+            return redirect(url_for('auth_bp.register'))
+
+        # If both are clear, create user
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Registration successful! You can now log in.', 'success')
+
+        flash('რეგისტრაცია წარმატებით დასრულდა! ახლა შეგიძლიათ სისტემაში შესვლა.', 'success')
         return redirect(url_for('auth_bp.login'))
 
-    # ---- FLASH FORM ERRORS ----
-    # This will flash the email domain error or any other validation error
+    # Flash validation errors (like password too short, etc.)
     for field, errors in form.errors.items():
         for error in errors:
-            flash(error, 'danger')
+            flash(f"{form[field].label.text}: {error}", 'danger')
 
     return render_template('register.html', form=form)
-
 
 # ------------------- Login -------------------
 @auth_bp.route('/login', methods=['GET', 'POST'])
