@@ -12,6 +12,7 @@ from flask_wtf import CSRFProtect
 import os
 import random
 import mimetypes
+from deep_translator import GoogleTranslator
 
 # ---------------- INIT APP ----------------
 mimetypes.add_type('video/mp4', '.mp4')
@@ -49,6 +50,15 @@ def load_user(user_id):
 def load_language():
     g.lang = request.cookies.get('lang', 'ge')
 
+#-------------------TRANSLATOR-------------------
+def translate_text(text):
+    if text and hasattr(g, 'lang') and g.lang == 'en':
+        try:
+            return GoogleTranslator(source='auto', target='en').translate(text)
+        except Exception as e:
+            print(f"Translation failed: {e}")
+            return text
+    return text
 # ---------------- PUBLIC ROUTES ----------------
 @app.route("/")
 def index():
@@ -94,7 +104,6 @@ def index():
             standard_key = mapping.get(cat_name.lower(), cat_name)
             total_counts[standard_key] = total_counts.get(standard_key, 0) + count
 
-    # 4. Pass the summed totals to your categories list
     categories = [
         SimpleNamespace(name="მთები", en_name="Mountains", icon="mountains.svg", count=total_counts.get("Mountains", 0)),
         SimpleNamespace(name="ჩანჩქერები", en_name="Waterfalls", icon="waterfall.svg", count=total_counts.get("Waterfalls", 0)),
@@ -133,6 +142,11 @@ def home():
     for place in suggested_places:
         place.avg_rating = round(sum(r.stars for r in place.ratings) / len(place.ratings), 1) if place.ratings else 0
 
+    if g.lang == 'en':
+        for place in suggested_places:
+            place.name = translate_text(place.name)
+            place.description = translate_text(place.description)
+
     user_favorites = current_user.favorites
     max_favorites = 6
     favorites_to_show = (
@@ -158,6 +172,8 @@ def home():
 @login_required
 def profile():
     my_places = Place.query.filter_by(user_id=current_user.id).all()
+    favorites = current_user.favorites or []
+    planned_routes = PlannedRoute.query.filter(PlannedRoute.user_id == current_user.id).all()
     try:
         favorites = current_user.favorites or []
     except Exception:
@@ -168,14 +184,22 @@ def profile():
     except Exception:
         avg_rating = 0
 
-    planned_routes = PlannedRoute.query.filter(PlannedRoute.user_id == current_user.id).all()
+    for p in my_places:
+        p.name = translate_text(p.name)
+
+    for f in favorites:
+        f.name = translate_text(f.name)
+
+    for route in planned_routes:
+        if route.place:
+            route.place.name = translate_text(route.place.name)
 
     return render_template(
         "profile.html",
         favorites=favorites,
         planned_routes=planned_routes,
         my_places=my_places,
-        avg_rating=avg_rating
+        avg_rating=current_user.calculate_avg_rating() if hasattr(current_user, 'calculate_avg_rating') else 0
     )
 
 @app.route("/delete_route/<int:route_id>", methods=["POST"])
@@ -229,6 +253,7 @@ def categories():
     selected_region = request.args.get("region", "").strip()
     favorites_only = request.args.get("favorites_only", "").strip()
 
+
     query = Place.query
 
     if selected_category:
@@ -275,6 +300,10 @@ def categories():
 
     # If English, we use the key as the name (e.g., "Tbilisi"), else we use the Georgian value
     regions_list = [(code, code if lang == 'en' else name) for code, name in region_map_ge.items()]
+
+    for place in paginated_places:
+        place.name = translate_text(place.name)
+        place.description = translate_text(place.description)
 
     return render_template(
         "categories.html",
@@ -385,6 +414,14 @@ def add_place():
 def place_detail(place_id):
     place = Place.query.get_or_404(place_id)
 
+    place.name = translate_text(place.name)
+    place.description = translate_text(place.description)
+
+    # Translate the comments in the ratings
+    for rating in place.ratings:
+        if rating.comment:
+            rating.comment = translate_text(rating.comment)
+
     if request.method == "POST":
         action = request.form.get("action")
         if action == "favorite":
@@ -413,6 +450,7 @@ def place_detail(place_id):
         db.session.commit()
         return redirect(url_for("place_detail", place_id=place.id))
 
+
     avg_rating = round(sum(r.stars for r in place.ratings)/len(place.ratings), 1) if place.ratings else 0
     return render_template("place_detail.html", place=place, ratings=place.ratings, avg_rating=avg_rating)
 
@@ -430,6 +468,7 @@ def category_places(category_name):
 
 
 @app.route("/toggle_favorite/<int:place_id>", methods=["POST"])
+@csrf.exempt
 @login_required
 def toggle_favorite(place_id):
     # Modern SQLAlchemy 2.0 way
@@ -450,10 +489,14 @@ def toggle_favorite(place_id):
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 500
 
+
 @app.route('/booking', methods=['GET', 'POST'])
 @login_required
 def booking():
     spots = Place.query.all()
+
+    for spot in spots:
+        spot.name = translate_text(spot.name)
 
     if request.method == 'POST':
         spot_name = request.form['spot']

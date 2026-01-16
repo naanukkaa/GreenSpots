@@ -93,7 +93,11 @@
     }
     .add-place-btn {
         top: -2rem;
-        font-size: 12px;
+        font-size: 18px;
         height: 40px;
+    }
+
+    .hero-title{
+        font-size: 36px !important;
     }
 }

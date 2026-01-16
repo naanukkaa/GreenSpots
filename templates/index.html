@@ -9,6 +9,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.web-fonts.ge/fonts/alk-life/css/alk-life.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
@@ -36,8 +37,13 @@
                 <li class="nav-item"><a class="nav-link" href="#about">{% if g.lang=='en' %}About Us{% else %}ჩვენს შესახებ{% endif %}</a></li>
             </ul>
             <div class="d-flex gap-2 align-items-center">
-                <button id="lang-toggle" class="btn btn-outline-green btn-sm px-3">{% if g.lang == 'en' %}EN{% else %}GE{% endif %}</button>
-
+                <button id="lang-toggle" class="btn btn-outline-green btn-sm p-0 overflow-hidden d-flex">
+                    {% if g.lang == 'en' %}
+                        <img src="{{ url_for('static', filename='img/eng.svg') }}" alt="EN" class="lang-flag">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='img/geo.svg') }}" alt="GE" class="lang-flag">
+                    {% endif %}
+                </button>
                 <a href="{{ url_for('auth_bp.login') }}"><button class="btn btn-outline-green">{% if g.lang=='en' %}Login{% else %}ავტორიზაცია{% endif %}</button></a>
                 <a href="{{ url_for('auth_bp.register') }}"><button class="btn btn-primary-green">{% if g.lang=='en' %}Register{% else %}რეგისტრაცია{% endif %}</button></a>
             </div>
@@ -55,17 +61,16 @@
     <div class="floating-orb floating-orb-2"></div>
 
     <div class="hero-content">
-        <div class="hero-badge"><i class="bi bi-compass"></i><span>{% if g.lang=='en' %}Discover Georgia's hidden historic places{% else %}აღმოაჩინე საქართველოს დამალული, ისტორიებით სავსე ადგილები{% endif %}</span></div>
+        <div class="hero-badge"><i class="bi bi-compass compassicon"></i><span>{% if g.lang=='en' %}Discover Georgia's hidden historic places{% else %}აღმოაჩინე საქართველოს დამალული, ისტორიებით სავსე ადგილები{% endif %}</span></div>
         <h1 class="hero-title">GreenSpots</h1>
-        <p class="hero-slogan-georgian">{% if g.lang=='en' %}Discover Georgia, Share the Emotion, Be a Guide for Others{% else %}აღმოაჩინე საქართველო, გაავრცელე ემოცია, იყავი სხვისთვის გიდი{% endif %}</p>
-        {% if g.lang != 'en' %}<p class="hero-subtitle">Discover Georgia, Share the Emotion, Be a Guide for Others</p>{% endif %}
+        <p class="hero-slogan-georgian">{% if g.lang=='en' %}Discover Georgia, Share the Emotion, Be a Guide for Others{% else %}<span class="bold">აღმოაჩინე</span> საქართველო, <span class="bold">გაავრცელე</span> ემოცია, <span class="bold">გახდი</span> სხვისთვის გიდი{% endif %}</p>
 
         <div class="hero-search">
             <form method="GET" action="{{ url_for('index') }}">
                 <div class="search-box">
-                    <i class="bi bi-search ms-3 text-muted"></i>
-                    <input type="text" name="search" placeholder="{% if g.lang=='en' %}Search waterfalls, caves...{% else %}მოძებნეთ ჩანჩქერები, გამოქვაბულები...{% endif %}" value="{{ request.args.get('search','') }}">
-                    <select name="region" class="d-none d-sm-block">
+                    <i class="bi bi-search ms-3 text-muted searchicon"></i>
+                    <input type="text" name="search" class="searchbar" placeholder="{% if g.lang=='en' %}waterfalls, caves...{% else %}ჩანჩქერები, გამოქვაბულები...{% endif %}" value="{{ request.args.get('search','') }}">
+                    <select name="region" class="d-none d-sm-block regionsopt">
                         <option>{% if g.lang=='en' %}All Regions{% else %}ყველა რეგიონი{% endif %}</option>
                         <option disabled>კახეთი</option>
                         <option disabled>სვანეთი</option>
@@ -133,7 +138,7 @@
     </div>
 
         <div class="text-center mt-4">
-            <button class="btn btn-outline-green btn-lg">{% if g.lang=='en' %}View All{% else %}იხილეთ ყველა{% endif %}</button>
+            <button class="btn btn-outline-green btn-lg view-all">{% if g.lang=='en' %}View All{% else %}იხილეთ ყველა{% endif %}</button>
         </div>
     </div>
 </section>
@@ -232,7 +237,7 @@
 
 <footer id="about">
     <section class="cta-section" style="position: relative; overflow: hidden; padding: 80px 0; color: white;">
-        <video autoplay muted loop playsinline id="footer-video"
+        <video autoplay muted loop playsinline class="footer-video"
                style="position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: 200px; z-index: 0; transform: translate(-50%, -50%); object-fit: cover;">
             <source src="{{ url_for('static', filename='img/loading.mp4') }}" type="video/mp4">
         </video>

@@ -1,10 +1,11 @@
 body {
-    font-family: 'Inter', "ALK life",sans-serif;
+    font-family: "ALK life", 'Inter', sans-serif;
     background: var(--background);
     color: var(--text);
     margin: 0;
     padding: 0;
 }
+
 .auth-section {
     min-height: 100vh;
     display: flex;
@@ -93,6 +94,54 @@ body {
     color: var(--muted);
     text-decoration: none;
     margin-top: 0.5rem;
+}
+
+.auth-container {
+    display: flex;
+    min-height: 100vh;
+    padding-top: 48px;
+}
+
+.auth-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 50px;
+    background-color: #f5f5f5;
+}
+
+.auth-left h2 {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 36px;
+}
+
+.auth-left p {
+    color: #555;
+    margin-bottom: 30px;
+}
+
+.auth-left .form-control {
+    margin-bottom: 15px;
+}
+
+.auth-left button {
+    background-color: #2b9348;
+    color: white;
+    border: none;
+}
+
+.auth-left a {
+    color: #2b9348;
+    text-decoration: none;
+}
+
+.auth-right {
+    flex: 1;
+    background-image: url("../img/login.jpg");
+    background-size: cover;
+    background-position: center;
 }
 
 /* ===== FOOTER ===== */
@@ -207,4 +256,59 @@ body {
 
 .footer-bottom a:hover {
     color: white;
+}
+
+/* ===== MEDIA QUERIES ===== */
+
+@media (max-width: 769px) {
+    .auth-section {
+        padding: 4rem 1.5rem 3rem; /* Reduced top padding */
+    }
+    .auth-container {
+        flex-direction: column;
+        padding-top: 40px; /* Reduced top padding */
+    }
+    .auth-right {
+        height: 40vh;
+    }
+}
+
+@media (max-width: 426px) {
+    .auth-section {
+        padding: 2rem 1rem 2rem; /* Reduced top padding */
+    }
+    .auth-container {
+        padding-top: 20px; /* Reduced top padding */
+    }
+    .auth-card {
+        padding: 2rem 1.5rem;
+        max-width: 100%;
+    }
+    .auth-left h2 {
+        font-size: 38px;
+        text-align: center;
+    }
+
+    .option{
+        text-align: center;
+    }
+}
+
+@media (max-width: 376px) {
+    .auth-section {
+        padding: 1.5rem 1rem 2rem; /* Reduced top padding */
+    }
+
+    .auth-left h2{
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 326px) {
+    .auth-section {
+        padding: 1rem 1rem 2rem; /* Reduced top padding */
+    }
+    .auth-left h2 {
+        font-size: 26px;
+    }
 }

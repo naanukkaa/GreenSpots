@@ -159,6 +159,23 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 6px 20px rgba(212, 162, 52, 0.4);
 }
 
+#lang-toggle {
+    width: 45px;         /* Fixed width */
+    height: 30px;        /* Fixed height */
+    border: 1px solid #2d5a41; /* Matches your green theme */
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+}
+
+.lang-flag {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;   /* This makes it "Full" without stretching weirdly */
+    display: block;
+}
 /* ===== HERO SECTION ===== */
 .hero-section {
     position: relative;
@@ -190,10 +207,22 @@ h1, h2, h3, h4, h5, h6 {
     left: 0;
     width: 100%;
     height: 100%;
+
     background: linear-gradient(180deg,
-        rgba(127, 190, 152, 0.85) 0%,
-        rgba(146, 214, 173, 0.65) 50%,
-        rgba(42, 90, 61, 0.9) 100%);
+        rgba(45, 80, 60, 0.7) 0%,   /* Lightened from 30, 55, 40 */
+        rgba(35, 65, 50, 0.55) 50%, /* Dropped opacity for more clarity */
+        rgba(20, 35, 25, 0.8) 100%  /* Softened the deep black-green */
+    );
+
+    /* This is the sweet spot for the "soft mountain" look */
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+
+    z-index: 1;
+}
+
+.bold{
+    font-weight: 900;
 }
 
 .hero-content {
@@ -250,6 +279,7 @@ h1, h2, h3, h4, h5, h6 {
 .hero-search {
     max-width: 700px;
     margin: 0 auto 3rem;
+    margin-top: 30px;
     animation: fadeUp 0.6s ease-out 0.4s forwards;
     opacity: 0;
 }
@@ -288,6 +318,7 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--foreground);
     border-left: 1px solid rgba(42, 90, 61, 0.1);
     cursor: pointer;
+    margin-right: 10px;
 }
 
 .search-box select:focus {
@@ -564,11 +595,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .category-title {
-    font-family: 'Playfair Display', serif;
+    font-family: 'ALK life', 'Playfair Display', serif;
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 0.25rem;
     transition: color 0.3s ease;
+    color: var(--forest-600);
 }
 
 .category-card:hover .category-title {
@@ -599,6 +631,29 @@ h1, h2, h3, h4, h5, h6 {
 .category-card:hover .category-arrow {
     opacity: 1;
     transform: translateX(0);
+}
+
+.stat {
+    text-align: center;
+}
+
+.hero-number {
+    font-size: 34px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.stat-label {
+    margin-top: 6px;
+    font-size: 33px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #ffffff;
+}
+
+.hero-stats-wrapper {
+    margin-top: 48px;
+    margin-bottom: 80px; /* space for scroll indicator */
 }
 
 /* ===== MAP SECTION ===== */
@@ -1005,6 +1060,10 @@ h1, h2, h3, h4, h5, h6 {
         border-top: 1px solid rgba(42, 90, 61, 0.1);
         width: 100%;
     }
+
+    .lang-toggle{
+        width: 30px !important;
+    }
 }
 
 img {
@@ -1017,8 +1076,16 @@ body {
 }
 
 
-@media (max-width: 769px) {
+/* --- GLOBAL / DESKTOP STYLES --- */
+.stats-section {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    padding: 80px 20px;
+}
 
+/* --- TABLET & MOBILE (max-width: 769px) --- */
+@media (max-width: 769px) {
     /* NAVBAR */
     .navbar .navbar-nav {
         text-align: center;
@@ -1031,8 +1098,17 @@ body {
     }
 
     /* HERO */
+    .hero-section {
+        margin-top: 70px;
+    }
+
     .hero-title {
-        font-size: 3rem;
+        font-size: 52px !important;
+    }
+
+    .hero-slogan-georgian {
+        margin-bottom: 30px;
+        font-weight: 700 !important; /* Fixed: removed 'px' */
     }
 
     .hero-slogan-georgian,
@@ -1042,7 +1118,7 @@ body {
     }
 
     .hero-search .search-box {
-        flex-direction: column;
+        flex-direction: row;
         gap: 10px;
         padding: 15px;
     }
@@ -1054,16 +1130,22 @@ body {
     }
 
     .hero-stats {
-        flex-direction: column;
-        gap: 15px;
+        flex-direction: row;
     }
 
-    .auth-right{
+    /* AUTH & UI ELEMENTS */
+    .auth-right,
+    .auth-container {
         display: none;
     }
 
-    .auth-container{
-        display: none;
+    .view-all {
+        width: 300px !important;
+        margin-top: 20px;
+    }
+
+    .searchbar {
+        padding-left: 4px !important;
     }
 
     /* FEATURED SPOTS */
@@ -1075,9 +1157,15 @@ body {
         font-size: 0.95rem;
     }
 
-    /* CATEGORIES */
+    /* CATEGORIES - Centered items */
     .category-card {
-        padding: 20px 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;    /* Horizontal center */
+        justify-content: center; /* Vertical center */
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
     }
 
     .category-title {
@@ -1091,6 +1179,7 @@ body {
 
     .map-preview {
         height: 300px;
+        width: 100%;
     }
 
     /* HOW IT WORKS */
@@ -1109,16 +1198,18 @@ body {
     }
 }
 
-
-@media (max-width: 425px) {
-
-    /* HERO */
+/* --- SMALL MOBILE (max-width: 425px) --- */
+@media (max-width: 426px) {
     .hero-title {
         font-size: 2.2rem;
     }
 
+    .hero-content{
+        padding: 32px 20px;
+    }
+
     .hero-badge {
-        font-size: 0.8rem;
+        font-size: 14px;
         padding: 6px 10px;
     }
 
@@ -1127,20 +1218,27 @@ body {
         font-size: 0.9rem;
     }
 
-    .hero-search {
-        width: 100%;
+    .hero-slogan-georgian{
+        font-weight: 400 !important;
+        font-size: 18px;
+
     }
 
-    /* STATS */
+    .hero-search select{
+        display: block !important;
+    }
     .stat-number {
         font-size: 1.5rem;
+    }
+
+    .hero-stats {
+        flex-direction: column;
     }
 
     .stat-label {
         font-size: 0.85rem;
     }
 
-    /* SECTION HEADERS */
     .section-title {
         font-size: 1.6rem;
     }
@@ -1149,7 +1247,18 @@ body {
         font-size: 0.95rem;
     }
 
-    /* SPOT CARDS */
+    #lang-toggle {
+        margin: 0px;
+    }
+
+    .compassicon {
+        display: none;
+    }
+
+    .category-card{
+        margin-bottom: 2px !important;
+    }
+
     .spot-title {
         font-size: 1.1rem;
     }
@@ -1158,22 +1267,18 @@ body {
         font-size: 0.9rem;
     }
 
-    /* CATEGORY GRID */
     .categories-section .col-6 {
         padding: 8px;
     }
 
-    /* MAP */
     .map-preview {
         height: 220px;
     }
 
-    /* BUTTONS */
     .btn {
         width: 100%;
     }
 
-    /* FOOTER */
     .footer-bottom .d-flex {
         flex-direction: column;
         gap: 10px;
@@ -1181,33 +1286,201 @@ body {
     }
 }
 
-.stats-section {
-    display: flex;
-    justify-content: center;
-    gap: 60px;
-    padding: 80px 20px;
+@media (max-width: 375px) {
+    /* HERO */
+    .hero-section {
+        padding: 20px 0px !important;
+    }
+
+    .hero-title {
+        font-size: 1.8rem; /* ~29px - Clear and bold */
+        line-height: 1.2;
+    }
+
+    .hero-content {
+        padding: 10px 15px;
+    }
+
+    .hero-badge {
+        font-size: 11px; /* Slightly bumped for readability */
+        padding: 4px 8px;
+    }
+
+    .hero-slogan-georgian {
+        font-size: 16px;
+        margin-bottom: 20px;
+        line-height: 1.4;
+    }
+
+    .hero-subtitle {
+        font-size: 0.85rem;
+    }
+
+    /* STATS & SECTIONS */
+    .hero-stats {
+        flex-direction: row !important;
+        justify-content: center;
+        gap: 15px; /* Added gap so they don't touch */
+    }
+
+    .hero-stat {
+        /* Removed fixed 20px height/width - it would cut off your text */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 1.1rem; /* 10px was too small; this is ~18px */
+        font-weight: bold;
+    }
+
+    .stat-label {
+        font-size: 10px; /* 8px is below the accessibility minimum */
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .section-title {
+        font-size: 1.4rem; /* Matching the 1.3rem-1.4rem scale we discussed */
+        font-weight: 700;
+    }
+
+    .section-description {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
+    /* CARDS & CONTENT */
+    .category-card {
+        padding: 12px; /* Slightly tighter for 375px */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .spot-title {
+        font-size: 1rem;
+    }
+
+    .spot-description {
+        font-size: 0.85rem;
+    }
+
+    .categories-section .col-6 {
+        padding: 5px;
+    }
+
+    /* MAP & BUTTONS */
+    .map-preview {
+        height: 180px;
+    }
+
+    .btn {
+        padding: 12px; /* Slightly larger hit area for thumbs */
+        font-size: 0.9rem;
+        width: 100%; /* Best practice for mobile buttons */
+    }
 }
 
-.stat {
-    text-align: center;
-}
+@media (max-width: 320px) {
+    /* HERO */
+    .hero-title {
+        font-size: 1.5rem; /* Further reduction to prevent 1-word-per-line */
+    }
 
-.hero-number {
-    font-size: 34px;
-    font-weight: 700;
-    color: #ffffff;
-}
+    .hero-content {
+        padding: 15px 10px; /* Minimal side padding */
+    }
 
-.stat-label {
-    margin-top: 6px;
-    font-size: 33px;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: #ffffff;
-}
+    .hero-badge {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
 
-.hero-stats-wrapper {
-    margin-top: 48px;
-    margin-bottom: 80px; /* space for scroll indicator */
-}
+    .hero-slogan-georgian {
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
 
+    /* SEARCH BOX */
+    .hero-search .search-box {
+        padding: 10px;
+        gap: 5px;
+    }
+
+    /* STATS */
+    .hero-stats {
+        display: flex;
+        flex-wrap: wrap;       /* Allows items to drop to next line */
+        justify-content: center;
+        gap: 15px;             /* Space between items */
+        margin-top: 20px;
+        width: 100%;           /* Ensure container takes full width */
+    }
+
+    .hero-stat {
+        flex: 0 0 45%;         /* Take up slightly less than half width */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    /* The 3rd item (bottom one) */
+    .hero-stat:last-child {
+        flex: 0 0 100%;        /* Take up full width to stay centered on bottom */
+        margin-top: 5px;
+    }
+
+    .stat-number {
+        font-size: 1.2rem;     /* Increased from 10px for readability */
+        font-weight: 700;
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 10px;       /* Increased from 8px for readability */
+        text-transform: uppercase;
+        opacity: 0.9;
+    }
+    /* CARDS */
+    .category-card {
+        padding: 10px 5px;
+    }
+
+    .category-title {
+        font-size: 0.85rem;
+    }
+
+    .spot-title {
+        font-size: 0.95rem;
+    }
+
+    .spot-description {
+        font-size: 0.8rem;
+    }
+
+    /* GRID SPACING */
+    .categories-section .row {
+        margin-left: -5px;
+        margin-right: -5px;
+    }
+
+    .categories-section .col-6 {
+        padding: 4px;
+    }
+
+    /* MAP */
+    .map-preview {
+        height: 150px;
+    }
+
+    /* BUTTONS */
+    .btn {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+}

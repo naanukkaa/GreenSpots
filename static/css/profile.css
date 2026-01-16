@@ -103,6 +103,9 @@ html {
         text-align: center;
     }
 
+    .hero-title{
+        font-size: 40px !important;
+    }
     /* Force all section titles to center on tablet/mobile */
     .container h2, .container h3 {
         text-align: center !important;
@@ -118,11 +121,16 @@ html {
         width: 90%; /* Let it breathe on tablet */
         max-width: 320px;
     }
+
+    .added-locs {
+        text-align: center;
+        margin-left: 30px;
+    }
 }
 
 @media (max-width: 480px) {
     .profile-header h1.hero-title {
-        font-size: 1.5rem;
+        font-size: 20px !important;
     }
 
     .profile-header p.hero-slogan-georgian {
@@ -136,5 +144,78 @@ html {
 
     .added-locs, .profile-favorites, .profile-routes {
         padding-bottom: 60px !important;
+    }
+
+    .added-locs {
+        text-align: center;
+        margin-left: 0px;
+    }
+}
+@media (max-width: 360px) {
+
+    /* Header */
+    .profile-header {
+        padding: 4rem 0.75rem 1.5rem;
+    }
+
+    .profile-header i.bi-person-circle {
+        font-size: 3rem;
+    }
+
+    .profile-header h1.hero-title {
+        font-size: 16px !important;
+        line-height: 1.25;
+    }
+
+    .profile-header p.hero-slogan-georgian {
+        font-size: 0.8rem;
+    }
+
+    .profile-details h2{
+        font-size
+    }
+    /* Section titles */
+    .container h2,
+    .container h3 {
+        font-size: 1.3rem !important;
+        text-align: center !important;
+    }
+
+    /* Cards */
+    .place-card,
+    .favorite-item,
+    .routes-slider .card {
+        width: 92%;
+        max-width: 260px;
+        margin: 6px auto;
+        border-radius: 10px;
+    }
+
+    .place-card img,
+    .profile-favorites .card-img-top {
+        height: 140px;
+    }
+
+    .place-info {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+
+    /* Slick arrows & dots */
+    .slick-prev:before,
+    .slick-next:before {
+        font-size: 18px;
+    }
+
+    .slick-dots {
+        bottom: -22px;
+    }
+
+    /* Containers */
+    .added-locs,
+    .profile-favorites,
+    .profile-routes {
+        padding: 20px 10px 50px !important;
+        margin-left: 0 !important;
     }
 }

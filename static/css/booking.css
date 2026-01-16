@@ -151,20 +151,6 @@ body {
 
 @media (max-width: 769px) {
     .hero-booking {
-    padding: 160px 0;
-    }
-
-    .hero-booking h1 {
-    font-size: 60px;
-    }
-
-    .hero-booking p{
-    font-size: 20px;
-    }
-}
-
-@media (max-width: 769px) {
-    .hero-booking {
     padding: 190px 0;
     }
 
@@ -174,5 +160,27 @@ body {
 
     .hero-booking p{
     font-size: 19px;
+    }
+}
+
+@media (max-width: 426px) {
+    .hero-booking h1 {
+    font-size: 38px;
+    margin-bottom: 20px;
+    }
+
+    .hero-booking p{
+    font-size: 16px;
+    }
+}
+
+@media (max-width: 326px) {
+    .hero-booking h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    }
+
+    .hero-booking p{
+    font-size: 14px;
     }
 }

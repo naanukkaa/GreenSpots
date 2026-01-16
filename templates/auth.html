@@ -5,22 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GreenSpots — {% if g.lang=='en' %}Login{% else %}ავტორიზაცია{% endif %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">>
+    <link rel="stylesheet" href="//cdn.web-fonts.ge/fonts/alk-life/css/alk-life.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo.png') }}">
-    <style>
-        .auth-container { display: flex; min-height: 100vh; padding-top: 80px; } /* Added padding for header */
-        .auth-left { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 50px; background-color: #f5f5f5; }
-        .auth-left h2 { font-weight: bold; margin-bottom: 10px; }
-        .auth-left p { color: #555; margin-bottom: 30px; }
-        .auth-left .form-control { margin-bottom: 15px; }
-        .auth-left button { background-color: #2b9348; color: white; border: none; }
-        .auth-left a { color: #2b9348; text-decoration: none; }
-        .auth-right { flex: 1; background-image: url('{{ url_for("static", filename="img/login.jpg") }}'); background-size: cover; background-position: center; }
-        @media (max-width: 768px) { .auth-container { flex-direction: column; } .auth-right { height: 40vh; } }
-    </style>
 </head>
 <body>
     {% include "header.html" %}
@@ -46,8 +37,7 @@
                 <button type="submit" class="btn w-100 mt-2">{% if g.lang=='en' %}Login{% else %}შესვლა{% endif %}</button>
             </form>
 
-            <div class="mt-3">{% if g.lang=='en' %}or{% else %}ან{% endif %}</div>
-            <div class="mt-2">
+            <div class="mt-2 option">
                 <a href="{{ url_for('auth_bp.register') }}">
                     {% if g.lang=='en' %}Don't have an account? <strong>Register</strong>{% else %}არ გაქვს ანგარიში? <strong>რეგისტრაცია</strong>{% endif %}
                 </a>

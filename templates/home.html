@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
+<link rel="stylesheet" href="//cdn.web-fonts.ge/fonts/alk-life/css/alk-life.min.css">
 
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo.png') }}">
 {% endblock %}
@@ -24,9 +25,9 @@
             {% if g.lang=='en' %}Your personalized adventure starts here.{% else %}შენი პერსონალიზებული თავგადასავალი აქ იწყება.{% endif %}
         </p>
 
-        <div class="d-flex justify-content-center gap-2 mt-4">
+        <div class="d-flex justify-content-center gap-2 mt-4 searchbar">
             <input type="text" class="form-control form-control-lg w-75" placeholder="{% if g.lang=='en' %}Search places...{% else %}მოძებნეთ ადგილები...{% endif %}" disabled>
-            <button class="btn btn-primary-green btn-lg">{% if g.lang=='en' %}Search{% else %}ძებნა{% endif %}</button>
+            <button class="btn btn-primary-green btn-lg ">{% if g.lang=='en' %}Search{% else %}ძებნა{% endif %}</button>
         </div>
     </div>
 </section>
@@ -86,11 +87,11 @@
                     <img src="{{ url_for('static', filename='uploads/' + favorite.image) }}" class="card-img-top" alt="{{ favorite.name }}">
                     <div class="card-body">
                         <h5 class="card-title">{{ favorite.name }}</h5>
-                        <form method="POST" action="{{ url_for('toggle_favorite', place_id=favorite.id) }}">
-                            <button type="submit" class="btn btn-sm btn-outline-green">
-                                <i class="bi bi-heart-fill text-danger"></i> {% if g.lang=='en' %}Remove{% else %}წაშლა{% endif %}
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-sm btn-outline-green favorite-btn" data-id="{{ favorite.id }}">
+                            <i class="bi bi-heart-fill text-danger"></i>
+                            {% if g.lang=='en' %}Remove{% else %}წაშლა{% endif %}
+                        </button>
+
                     </div>
                 </div>
             </div>
@@ -142,22 +143,31 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".favorite-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+
             const placeId = btn.dataset.id;
-            fetch(`/toggle_favorite/${placeId}`, { method: "POST" })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === "added") {
-                        btn.innerHTML = '<i class="bi bi-heart-fill text-danger"></i>';
-                    } else {
-                        btn.innerHTML = '<i class="bi bi-heart"></i>';
-                    }
-                })
-                .catch(err => console.error(err));
+
+            fetch(`/toggle_favorite/${placeId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "added") {
+                    btn.innerHTML = '<i class="bi bi-heart-fill text-danger"></i>';
+                } else if (data.status === "removed") {
+                    btn.innerHTML = '<i class="bi bi-heart"></i>';
+                }
+            })
+            .catch(err => console.error(err));
         });
     });
 });
 </script>
+
 
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
@@ -192,15 +202,7 @@ $(document).ready(function(){
         ]
     });
 });
-</script>
 
-<script>
-    // Ensure CSRF logic exists if your app requires it
-    const csrfElement = document.querySelector('meta[name="csrf-token"]');
-    if (csrfElement) {
-        const csrfToken = csrfElement.getAttribute('content');
-        // Example for fetch usage with CSRF:
-        // headers: { "X-CSRFToken": csrfToken, ... }
-    }
+
 </script>
 {%endblock%}

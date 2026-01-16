@@ -20,8 +20,12 @@
             </ul>
 
             <div class="d-flex gap-2 align-items-center">
-                <button id="lang-toggle-header" class="btn btn-outline-green btn-sm px-2" style="font-size: 12px; height: 38px;">
-                    {% if g.lang == 'en' %}GE{% else %}EN{% endif %}
+                <button id="lang-toggle" class="btn btn-outline-green btn-sm p-0 overflow-hidden d-flex">
+                    {% if g.lang == 'en' %}
+                        <img src="{{ url_for('static', filename='img/eng.svg') }}" alt="EN" class="lang-flag">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='img/geo.svg') }}" alt="GE" class="lang-flag">
+                    {% endif %}
                 </button>
 
                 {% if current_user.is_authenticated %}
@@ -37,7 +41,7 @@
 </nav>
 
 <script>
-document.getElementById('lang-toggle-header').addEventListener('click', () => {
+document.getElementById('lang-toggle').addEventListener('click', () => {
     const current = document.cookie.match(new RegExp('(^| )lang=([^;]+)'))?.[2] || 'ge';
     const newLang = current === 'ge' ? 'en' : 'ge';
     document.cookie = `lang=${newLang};path=/;expires=Fri, 31 Dec 2030 23:59:59 GMT`;

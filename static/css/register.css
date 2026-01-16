@@ -1,10 +1,17 @@
+/* ===== GLOBAL STYLES ===== */
 body {
-    font-family: 'Inter', "ALK life",sans-serif;
+    font-family: "ALK life", 'Inter', sans-serif;
     background: var(--background);
     color: var(--text);
     margin: 0;
     padding: 0;
 }
+
+a {
+    text-decoration: none !important;
+}
+
+/* ===== AUTH SECTION & CONTAINER ===== */
 .auth-section {
     min-height: 100vh;
     display: flex;
@@ -13,44 +20,52 @@ body {
     padding: 8rem 1rem 4rem;
 }
 
-.auth-card {
-    background: rgba(255,255,255,0.9);
-    backdrop-filter: blur(12px);
-    border-radius: 20px;
-    width: 100%;
-    max-width: 420px;
-    padding: 2.5rem;
-    box-shadow: 0 20px 60px rgba(42, 90, 61, 0.25);
-    transform: translateY(40px);
-    opacity: 0;
-    transition: all 0.8s ease;
-}
-
-.auth-card.visible {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.auth-header h2 {
-    text-align: center;
+.auth-container {
     display: flex;
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+    min-height: 100vh;
+    flex-direction: row;
+    padding-top: 74px;
 }
 
-.auth-header p {
-    text-align: center;
-    color: var(--muted);
-    margin-bottom: 2rem;
+.auth-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px;
+    background-color: #f5f5f5;
+}
+
+.auth-left h2 {
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: black;
+    font-weight: bold;
+}
+
+.auth-left p {
+    font-size: 1rem;
+    margin-bottom: 30px;
+    color: #555;
+}
+
+/* ===== FORM ELEMENTS ===== */
+.auth-left form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 .form-group {
+    display: flex;
+    flex-direction: column;
     margin-bottom: 1.25rem;
 }
 
 .form-group label {
     font-weight: 500;
     font-size: 0.9rem;
+    margin-bottom: 5px;
 }
 
 .form-group input {
@@ -59,11 +74,31 @@ body {
     border-radius: 12px;
     border: 1px solid rgba(42, 90, 61, 0.2);
     background: transparent;
+    font-size: 1rem;
 }
 
 .form-group input:focus {
     outline: none;
     border-color: var(--forest-500);
+}
+
+.auth-left button {
+    padding: 12px;
+    font-size: 1rem;
+    background-color: #2b9348;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* ===== SPECIAL COMPONENTS ===== */
+.auth-right {
+    flex: 1;
+    background-image: url('../img/register.jpg'); /* Fixed relative path */
+    background-size: cover;
+    background-position: center;
 }
 
 .auth-divider {
@@ -88,34 +123,37 @@ body {
 
 .auth-switch {
     display: block;
-    text-align: center;
+    text-align: left;
     color: var(--muted);
-    text-decoration: none;
-    margin-top: 0.5rem;
+    margin-top: 15px;
+    font-size: 0.9rem;
 }
 
-.auth-switch a{
+.auth-switch a {
     color: var(--forest-500);
-    text-decoration: none;
 }
+
+#password-requirements {
+    list-style: none;
+    padding-left: 0;
+    font-size: 0.85rem;
+}
+
+#password-requirements li.valid {
+    color: green;
+    font-weight: bold;
+}
+
+#password-requirements li.invalid {
+    color: gray;
+}
+
 /* ===== FOOTER ===== */
 .footer-cta {
     background: var(--foreground);
     color: white;
     padding: 4rem 0;
     text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer-cta h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-}
-
-.footer-cta p {
-    opacity: 0.7;
-    margin-bottom: 2rem;
-    font-size: 1.1rem;
 }
 
 .footer-main {
@@ -128,18 +166,9 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-family: 'Playfair Display', serif;
     font-size: 1.25rem;
-    font-weight: 600;
     color: white;
-    text-decoration: none;
     margin-bottom: 1rem;
-}
-
-.footer-description {
-    opacity: 0.6;
-    margin-bottom: 1.5rem;
-    max-width: 400px;
 }
 
 .social-links {
@@ -156,37 +185,6 @@ body {
     align-items: center;
     justify-content: center;
     color: white;
-    text-decoration: none;
-    transition: background 0.3s ease;
-}
-
-.social-link:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-}
-
-.footer-title {
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.footer-links {
-    list-style: none;
-    padding: 0;
-}
-
-.footer-links li {
-    margin-bottom: 0.75rem;
-}
-
-.footer-links a {
-    color: rgba(255, 255, 255, 0.6);
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.footer-links a:hover {
-    color: white;
 }
 
 .footer-bottom {
@@ -196,18 +194,70 @@ body {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.footer-bottom p {
-    opacity: 0.5;
-    margin: 0;
-    font-size: 0.875rem;
+/* ===== MEDIA QUERIES (Reduced Top Margins) ===== */
+
+/* Tablet (769px) */
+@media (max-width: 769px) {
+    .auth-section {
+        padding: 4rem 1.5rem 3rem;
+    }
+    .auth-container {
+        flex-direction: column;
+        padding-top: 40px;
+    }
+    .auth-right {
+        height: 40vh;
+    }
 }
 
-.footer-bottom a {
-    color: rgba(255, 255, 255, 0.5);
-    text-decoration: none;
-    transition: color 0.3s ease;
+/* Mobile Large (426px) */
+@media (max-width: 426px) {
+    .auth-section {
+        padding: 2rem 1rem 2rem;
+    }
+    .auth-container {
+        padding-top: 20px;
+    }
+    .auth-left {
+        padding: 40px 20px;
+    }
+    .auth-left h2 {
+        text-align: center;
+        font-size: 40px;
+    }
+    .footer-main .row > div {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .auth-switch{
+        text-align: center;
+    }
 }
 
-.footer-bottom a:hover {
-    color: white;
+/* Mobile Medium (376px) */
+@media (max-width: 376px) {
+    .auth-section {
+        padding-top: 1.5rem;
+    }
+    .auth-left h2 {
+        font-size: 34px;
+    }
+    .auth-left p{
+        text-align: center;
+    }
+}
+
+/* Mobile Small (326px) */
+@media (max-width: 326px) {
+    .auth-section {
+        padding-top: 1rem;
+    }
+    .auth-left h2 {
+        font-size: 30px;
+    }
+    .footer-bottom .d-flex {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
 }
