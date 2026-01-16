@@ -3,6 +3,13 @@
 {% block title %}GreenSpots — Dashboard{% endblock %}
 
 {% block css %}
+<script>
+    // This MUST run before any CSS loads to prevent the white flash
+    (function() {
+        const savedTheme = localStorage.getItem('gs-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+</script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>

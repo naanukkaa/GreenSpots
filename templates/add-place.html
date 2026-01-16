@@ -3,6 +3,13 @@
 {% block title %}Add Place{% endblock %}
 
 {% block css %}
+<script>
+    // This MUST run before any CSS loads to prevent the white flash
+    (function() {
+        const savedTheme = localStorage.getItem('gs-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+</script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo.png') }}">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
