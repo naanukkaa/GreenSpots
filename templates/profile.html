@@ -1,87 +1,89 @@
 {% extends "base.html" %}
 
-{% block title %}Profile — GreenSpots{% endblock %}
+{% block title %}
+    {% if g.lang=='en' %}Profile{% else %}პროფილი{% endif %} — GreenSpots
+{% endblock %}
 
 {% block css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
-<script>
-    // This MUST run before any CSS loads to prevent the white flash
-    (function() {
-        const savedTheme = localStorage.getItem('gs-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
-</script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-<!-- Slick CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
 {% endblock %}
 
 {% block content %}
-<!-- Profile Header -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <section class="profile-header py-5 mt-5 text-center bg-light">
     <div class="container">
         <i class="bi bi-person-circle fs-1 mb-3"></i>
-        <h1 class="hero-title">გამარჯობა, {{ current_user.username }}!</h1>
-        <p class="hero-slogan-georgian">მოგესალმებით თქვენს პროფილში, შეგიძლიათ მართოთ ფავორიტები, გეგმები და პირადი ინფორმაცია.</p>
+        <h1 class="hero-title">
+            {% if g.lang=='en' %}Hello, {{ current_user.username }}!{% else %}გამარჯობა, {{ current_user.username }}!{% endif %}
+        </h1>
+        <p class="hero-slogan-georgian">
+            {% if g.lang=='en' %}Welcome to your profile. Manage your favorites, plans, and personal info.{% else %}მოგესალმებით თქვენს პროფილში, შეგიძლიათ მართოთ ფავორიტები, გეგმები და პირადი ინფორმაცია.{% endif %}
+        </p>
     </div>
 </section>
 
-<!-- Profile Details -->
 <section class="profile-details py-5">
     <div class="container">
-        <h2 class="mb-4">პირადი ინფორმაცია</h2>
+        <h2 class="mb-4">{% if g.lang=='en' %}Personal Information{% else %}პირადი ინფორმაცია{% endif %}</h2>
         <div class="row g-4">
             <div class="col-md-6">
                 <div class="card p-4 h-100">
-                    <h5>მომხმარებლის დეტალები</h5>
-                    <p><strong>სახელი:</strong> {{ current_user.username }}</p>
+                    <h5>{% if g.lang=='en' %}User Details{% else %}მომხმარებლის დეტალები{% endif %}</h5>
+                    <p><strong>{% if g.lang=='en' %}Username:{% else %}სახელი:{% endif %}</strong> {{ current_user.username }}</p>
                     <p><strong>Email:</strong> {{ current_user.email }}</p>
                     <p><strong>ID:</strong> {{ current_user.id }}</p>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="card p-4 h-100">
-                    <h5>სტატისტიკა</h5>
-                    <p><i class="bi bi-heart-fill text-danger"></i> ფავორიტები: {{ favorites|length }} ადგილი</p>
-                    <p><i class="bi bi-map"></i> დაგეგმილი მარშრუტები: {{ planned_routes|length }}</p>
-                    <p><i class="bi bi-star-fill text-warning"></i> საშუალო რეიტინგი: {{ avg_rating }}</p>
+                    <h5>{% if g.lang=='en' %}Statistics{% else %}სტატისტიკა{% endif %}</h5>
+                    <p><i class="bi bi-heart-fill text-danger"></i> {% if g.lang=='en' %}Favorites:{% else %}ფავორიტები:{% endif %} {{ favorites|length }} {% if g.lang=='en' %}places{% else %}ადგილი{% endif %}</p>
+                    <p><i class="bi bi-map"></i> {% if g.lang=='en' %}Planned Routes:{% else %}დაგეგმილი მარშრუტები:{% endif %} {{ current_user.routes|length }}</p>
+                    <p><i class="bi bi-star-fill text-warning"></i> {% if g.lang=='en' %}Average Rating:{% else %}საშუალო რეიტინგი:{% endif %} {{ avg_rating }}</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="added-locs container">
-    <h3 class="mb-4">ჩემი დამატებული ადგილები</h3>
-    <div class="my-places-slider"> {% for place in my_places %}
-            <div class="place-card">
-                <img src="{{ url_for('static', filename='uploads/' ~ place.image) }}" alt="{{ place.name }}">
-                <div class="place-info mt-2">
-                    <h5 class="text-center">{{ place.name }}</h5>
+<section class="added-locs container py-5">
+    <h3 class="mb-4">{% if g.lang=='en' %}My Added Places{% else %}ჩემი დამატებული ადგილები{% endif %}</h3>
+    <div class="my-places-slider">
+        {% for place in my_places %}
+            <div class="px-2">
+                <div class="place-card">
+                    <img src="{{ url_for('static', filename='uploads/' ~ place.image) }}" alt="{{ place.name }}" class="w-100 rounded" style="height:200px; object-fit:cover;">
+                    <div class="place-info mt-2">
+                        <h5 class="text-center">{{ place.name }}</h5>
+                    </div>
                 </div>
             </div>
         {% else %}
-            <p>თქვენ ჯერ არ დაგიმატებიათ ადგილები.</p>
+            <p class="text-muted">{% if g.lang=='en' %}You haven't added any places yet.{% else %}თქვენ ჯერ არ დაგიმატებიათ ადგილები.{% endif %}</p>
         {% endfor %}
     </div>
 </section>
 
-<!-- Favorites Slider -->
 <section class="profile-favorites py-5 bg-light">
     <div class="container">
-        <h2 class="mb-4">თქვენი ფავორიტები</h2>
+        <h2 class="mb-4">{% if g.lang=='en' %}Your Favorites{% else %}თქვენი ფავორიტები{% endif %}</h2>
         <div class="favorites-slider">
             {% for place in favorites %}
-            <div class="card h-100 mx-2 favorite-item" id="favorite-{{ place.id }}">
-                <img src="{{ url_for('static', filename='uploads/' ~ place.image) }}" class="card-img-top" alt="{{ place.name }}">
-                <div class="card-body">
-                    <h5 class="card-title">{{ place.name }}</h5>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="toggleFavorite({{ place.id }})">
-                        წაშლა
-                    </button>
+            <div class="px-2 favorite-slide" id="favorite-{{ place.id }}">
+                <div class="card h-100">
+                    <img src="{{ url_for('static', filename='uploads/' ~ place.image) }}" class="card-img-top" alt="{{ place.name }}" style="height:180px; object-fit:cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ place.name }}</h5>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="toggleFavorite({{ place.id }})">
+                            {% if g.lang=='en' %}Delete{% else %}წაშლა{% endif %}
+                        </button>
+                    </div>
                 </div>
             </div>
             {% endfor %}
@@ -89,20 +91,24 @@
     </div>
 </section>
 
-
-<!-- Planned Routes Slider -->
 <section class="profile-routes py-5">
     <div class="container">
-        <h2 class="mb-4">დაგეგმილი მარშრუტები</h2>
+        <h2 class="mb-4">{% if g.lang=='en' %}Planned Routes{% else %}დაგეგმილი მარშრუტები{% endif %}</h2>
         <div class="routes-slider">
             {% for route in current_user.routes %}
-              <div class="card p-3 h-100 mx-2">
-                  <h5>{{ route.name }}</h5>
-                  <p>გეგმაში: {{ route.date.strftime('%d %B') }} – {{ route.place.name }}</p>
-                  <form method="POST" action="{{ url_for('delete_route', route_id=route.id) }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <button type="submit" class="btn btn-danger btn-sm">წაშლა</button>
-                  </form>
+              <div class="px-2">
+                  <div class="card p-3 h-100">
+                      <h5>{{ route.name }}</h5>
+                      <p>
+                        {% if g.lang=='en' %}Planned for:{% else %}გეგმაში:{% endif %}
+                        {{ route.date.strftime('%d %B') }} – {{ route.place.name }}
+                      </p>
+                      <form method="POST" action="{{ url_for('delete_route', route_id=route.id) }}"
+                            onsubmit="return confirm('{% if g.lang=="en" %}Are you sure?{% else %}ნამდვილად გსურთ წაშლა?{% endif %}');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <button type="submit" class="btn btn-danger btn-sm">{% if g.lang=='en' %}Delete{% else %}წაშლა{% endif %}</button>
+                      </form>
+                  </div>
               </div>
             {% endfor %}
         </div>
@@ -112,16 +118,16 @@
 <section class="py-5">
     <div class="container text-center">
         <hr class="my-4">
-        <h4 class="text-danger">საშიში ზონა</h4>
+        <h4 class="text-danger">{% if g.lang=='en' %}Danger Zone{% else %}საშიში ზონა{% endif %}</h4>
         <form action="{{ url_for('auth_bp.delete_account') }}" method="POST"
-              onsubmit="return confirm('This will permanently delete your account. Are you sure?');">
+              onsubmit="return confirm('{% if g.lang=="en" %}This will permanently delete your account. Are you sure?{% else %}ეს სამუდამოდ წაშლის თქვენს ანგარიშს. დარწმუნებული ხართ?{% endif %}');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <button type="submit" class="btn btn-danger">
-                Delete My Account
+                {% if g.lang=='en' %}Delete My Account{% else %}ჩემი ანგარიშის წაშლა{% endif %}
             </button>
         </form>
     </div>
 </section>
-
 {% endblock %}
 
 {% block js %}
@@ -129,40 +135,56 @@
 <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 
 <script>
-// Use jQuery's ready function for everything
 $(document).ready(function() {
+    const currentLang = "{{ g.lang }}";
 
-    // 1. Initialize Sliders
+    // Selectors
     const $favSlider = $('.favorites-slider');
 
-    $favSlider.slick({
-        slidesToShow: 4,
-        slidesToScroll: 1,
-        autoplay: true,
-        autoplaySpeed: 2500,
-        arrows: true,
-        dots: true,
-        infinite: true,
-        responsive: [
-            { breakpoint: 1024, settings: { slidesToShow: 3 } },
-            { breakpoint: 768, settings: { slidesToShow: 2 } },
-            { breakpoint: 480, settings: { slidesToShow: 1 } }
-        ]
-    });
+    // Initialize Sliders
+    if ($favSlider.find('.favorite-slide').length > 0) {
+        $favSlider.slick({
+            slidesToShow: 4,
+            slidesToScroll: 1,
+            autoplay: true,
+            arrows: true,
+            dots: true,
+            responsive: [
+                { breakpoint: 1024, settings: { slidesToShow: 3 } },
+                { breakpoint: 768, settings: { slidesToShow: 2 } },
+                { breakpoint: 480, settings: { slidesToShow: 1 } }
+            ]
+        });
+    }
 
     $('.routes-slider').slick({
         slidesToShow: 3,
         slidesToScroll: 1,
         infinite: false,
-        dots: true
+        dots: true,
+        responsive: [
+            { breakpoint: 768, settings: { slidesToShow: 1 } }
+        ]
     });
 
-    // 2. Optimized toggleFavorite Function
-    // We attach this to the window so the onclick calls can still find it
-    window.toggleFavorite = function(placeId) {
-        const csrfToken = $('meta[name="csrf-token"]').attr('content');
+    $('.my-places-slider').slick({
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        autoplay: true,
+        dots: true,
+        responsive: [
+            { breakpoint: 1024, settings: { slidesToShow: 3 } },
+            { breakpoint: 480, settings: { slidesToShow: 1 } }
+        ]
+    });
 
-        if (!confirm('ნამდვილად გსურთ წაშლა?')) return;
+    // Toggle Favorite Function
+    window.toggleFavorite = function(placeId) {
+        // Find token from meta or hidden input
+        const csrfToken = $('meta[name="csrf-token"]').attr('content');
+        const confirmMsg = currentLang === 'en' ? 'Remove from favorites?' : 'ნამდვილად გსურთ წაშლა?';
+
+        if (!confirm(confirmMsg)) return;
 
         fetch(`/toggle_favorite/${placeId}`, {
             method: 'POST',
@@ -171,76 +193,20 @@ $(document).ready(function() {
                 'Content-Type': 'application/json'
             }
         })
-        .then(res => {
-            if (!res.ok) throw new Error('Network error');
-            return res.json();
-        })
+        .then(res => res.json())
         .then(data => {
             if (data.status === 'removed') {
-                // Find the specific slide element
-                const $card = $(`#favorite-${placeId}`);
+                // Remove slide from Slick properly
+                const slideIndex = $(`#favorite-${placeId}`).closest('.slick-slide').data('slick-index');
+                $favSlider.slick('slickRemove', slideIndex);
 
-                // Get the correct index for Slick (ignoring cloned slides)
-                const slideIndex = $card.closest('.slick-slide').data('slick-index');
-
-                // Visual feedback: fade out
-                $card.css('opacity', '0');
-
-                setTimeout(() => {
-                    // Use Slick's official remove method to clean up the carousel
-                    $favSlider.slick('slickRemove', slideIndex);
-
-                    // Force a recalculation of positions
-                    $favSlider.slick('setPosition');
-
-                    // If zero slides left, reload to show empty state
-                    if ($favSlider.find('.card').length === 0) {
-                        location.reload();
-                    }
-                }, 300);
+                if ($favSlider.slick('getSlick').slideCount === 0) {
+                    location.reload(); // Refresh to show empty state
+                }
             }
         })
-        .catch(err => {
-            console.error('Error:', err);
-            alert('შეცდომა მოხდა წაშლისას');
-        });
+        .catch(err => alert(currentLang === 'en' ? 'Error deleting' : 'შეცდომა წაშლისას'));
     };
-});
-</script>
-
-<script>
-$(document).ready(function(){
-    $('.my-places-slider').slick({
-        infinite: false, // Stops at the last added place
-        slidesToShow: 4, // 4 items on desktop
-        slidesToScroll: 1,
-        autoplay: true,
-        autoplaySpeed: 2500,
-        dots: true,      // Shows those little navigation dots
-        arrows: true,    // Shows left/right arrows
-        infinite: true,
-        responsive: [
-            {
-                breakpoint: 1024,
-                settings: {
-                    slidesToShow: 3
-                }
-            },
-            {
-                breakpoint: 768,
-                settings: {
-                    slidesToShow: 2
-                }
-            },
-            {
-                breakpoint: 480,
-                settings: {
-                    slidesToShow: 1,
-                    arrows: false // Better for small mobile screens
-                }
-            }
-        ]
-    });
 });
 </script>
 {% endblock %}

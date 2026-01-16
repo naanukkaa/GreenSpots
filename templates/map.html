@@ -1,16 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}GreenSpots — რუკა{% endblock %}
+{% block title %}GreenSpots — {% if g.lang=='en' %}Map{% else %}რუკა{% endif %}{% endblock %}
 
 {% block css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
-<script>
-    // This MUST run before any CSS loads to prevent the white flash
-    (function() {
-        const savedTheme = localStorage.getItem('gs-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
-</script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/map.css') }}">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
@@ -19,9 +12,11 @@
 {% block content %}
 <section class="hero-section py-5 mt-5 text-center ">
     <div class="container">
-        <h1 class="hero-title mb-2">ინტერაქტიული რუკა</h1>
+        <h1 class="hero-title mb-2">
+            {% if g.lang=='en' %}Interactive Map{% else %}ინტერაქტიული რუკა{% endif %}
+        </h1>
         <p class="text-muted">
-            ყველა დამატებული ადგილი ერთ რუკაზე.
+            {% if g.lang=='en' %}All added places on one map.{% else %}ყველა დამატებული ადგილი ერთ რუკაზე.{% endif %}
         </p>
     </div>
 </section>
@@ -30,7 +25,8 @@
     <div class="map-wrapper">
     <a href="{{ url_for('add_place') }}"
        class="btn btn-success btn-lg add-place-btn shadow-lg">
-        <i class="bi bi-geo-alt me-2"></i> დაამატე ადგილი
+        <i class="bi bi-geo-alt me-2"></i>
+        {% if g.lang=='en' %}Add a Place{% else %}დაამატე ადგილი{% endif %}
     </a>
 
     <div id="map"></div>
@@ -50,6 +46,11 @@
       attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
+  // Define language-specific strings for JS
+  const lang = "{{ g.lang }}";
+  const viewText = lang === 'en' ? "View" : "ნახვა";
+  const noPlacesText = lang === 'en' ? "<b>No places added yet</b>" : "<b>ჯერ ადგილი არ არის დამატებული</b>";
+
   // Add real markers from backend
   {% if places %}
     {% for place in places %}
@@ -58,18 +59,18 @@
         .bindPopup(`
           <b>{{ place.name }}</b><br>
           <a href="{{ url_for('place_detail', place_id=place.id) }}">
-            ნახვა
+            ${viewText}
           </a>
         `);
     {% endfor %}
   {% else %}
       L.popup()
         .setLatLng([41.7167, 44.7833])
-        .setContent("<b>ჯერ ადგილი არ არის დამატებული</b>")
+        .setContent(noPlacesText)
         .openOn(map);
   {% endif %}
 
-  // Animations (kept from your original)
+  // Animations
   function animateOnScroll() {
       const sections = document.querySelectorAll('.hero-section, .map-container');
       const triggerBottom = window.innerHeight * 0.85;
@@ -84,9 +85,11 @@
 
   function showAddPlaceButton() {
       const addButton = document.querySelector('.add-place-btn');
-      setTimeout(() => {
-          addButton.classList.add('show');
-      }, 200);
+      if(addButton) {
+          setTimeout(() => {
+              addButton.classList.add('show');
+          }, 200);
+      }
   }
 
   window.addEventListener('scroll', animateOnScroll);

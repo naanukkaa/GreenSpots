@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request, abort, jsonify
+from flask import Flask, render_template, redirect, url_for, flash, request, abort, jsonify, g
 from flask_login import LoginManager, login_required, current_user
 from models import db, User, Place, Spot, Category, Rating, PlannedRoute, datetime
 from forms import PlaceForm
@@ -45,6 +45,9 @@ login_manager.init_app(app)
 def load_user(user_id):
     return db.session.get(User, int(user_id))
 
+@app.before_request
+def load_language():
+    g.lang = request.cookies.get('lang', 'ge')
 
 # ---------------- PUBLIC ROUTES ----------------
 @app.route("/")
@@ -66,15 +69,41 @@ def index():
         random.shuffle(spots)
         top_spots = spots[:10]
 
+    # 1. Get counts from DB grouped by category string
+    category_counts = db.session.query(
+        Place.category, func.count(Place.id)
+    ).group_by(Place.category).all()
+
+    # 2. Create a translation mapping to group them into English "buckets"
+    mapping = {
+        "mountains": "Mountains", "Mountains": "Mountains", "მთები": "Mountains",
+        "waterfalls": "Waterfalls", "Waterfalls": "Waterfalls", "ჩანჩქერები": "Waterfalls",
+        "historic": "Historical", "Historical": "Historical", "ისტორიული": "Historical",
+        "forests": "Forests", "Forests": "Forests", "ტყეები": "Forests",
+        "views": "Viewpoints", "Viewpoints": "Viewpoints", "ხედები": "Viewpoints",
+        "hiking": "Hiking", "Hiking": "Hiking", "ლაშქრობა": "Hiking",
+        "lakes": "Lakes", "Lakes": "Lakes", "ტბები": "Lakes",
+        "sunrise": "Sunrise", "Sunrise": "Sunrise", "მზის ამოსვლა": "Sunrise"
+    }
+
+    # 3. Sum up the counts into a standardized dictionary
+    total_counts = {}
+    for cat_name, count in category_counts:
+        if cat_name:
+            # Convert the DB value to lowercase before looking it up
+            standard_key = mapping.get(cat_name.lower(), cat_name)
+            total_counts[standard_key] = total_counts.get(standard_key, 0) + count
+
+    # 4. Pass the summed totals to your categories list
     categories = [
-        SimpleNamespace(name="მთები", icon="mountains.svg", count=18),
-        SimpleNamespace(name="ჩანჩქერები", icon="waterfall.svg", count=12),
-        SimpleNamespace(name="ისტორიული", icon="historic.svg", count=15),
-        SimpleNamespace(name="ტყეები", icon="forest.svg", count=10),
-        SimpleNamespace(name="ხედები", icon="view.svg", count=22),
-        SimpleNamespace(name="ლაშქრობა", icon="camp.svg", count=8),
-        SimpleNamespace(name="ტბები", icon="lakes.svg", count=6),
-        SimpleNamespace(name="მზის ამოსვლა", icon="sunset.svg", count=9),
+        SimpleNamespace(name="მთები", en_name="Mountains", icon="mountains.svg", count=total_counts.get("Mountains", 0)),
+        SimpleNamespace(name="ჩანჩქერები", en_name="Waterfalls", icon="waterfall.svg", count=total_counts.get("Waterfalls", 0)),
+        SimpleNamespace(name="ისტორიული", en_name="Historical", icon="historic.svg", count=total_counts.get("Historical", 0)),
+        SimpleNamespace(name="ტყეები", en_name="Forests", icon="forest.svg", count=total_counts.get("Forests", 0)),
+        SimpleNamespace(name="ხედები", en_name="Viewpoints", icon="view.svg", count=total_counts.get("Viewpoints", 0)),
+        SimpleNamespace(name="ლაშქრობა", en_name="Hiking", icon="camp.svg", count=total_counts.get("Hiking", 0)),
+        SimpleNamespace(name="ტბები", en_name="Lakes", icon="lakes.svg", count=total_counts.get("Lakes", 0)),
+        SimpleNamespace(name="მზის ამოსვლა", en_name="Sunrise", icon="sunset.svg", count=total_counts.get("Sunrise", 0)),
     ]
 
     stats = SimpleNamespace(
@@ -176,6 +205,7 @@ def delete_place(place_id):
 
 
 @app.route("/map")
+@login_required
 def map_page():
     places = Place.query.filter(
         Place.latitude.isnot(None),
@@ -187,9 +217,11 @@ def map_page():
 @app.route("/categories")
 @login_required
 def categories():
-    # Get current page from URL (default is 1)
+    # Detect language from cookie (default to 'ge')
+    lang = request.cookies.get('lang', 'ge')
+
     page = request.args.get('page', 1, type=int)
-    per_page = 20  # <--- HERE IS YOUR LIMIT
+    per_page = 20
 
     search_query = request.args.get("q", "").strip()
     selected_category = request.args.get("category", "").strip()
@@ -197,10 +229,8 @@ def categories():
     selected_region = request.args.get("region", "").strip()
     favorites_only = request.args.get("favorites_only", "").strip()
 
-    # Start the query
     query = Place.query
 
-    # Apply filters in the database
     if selected_category:
         query = query.filter(Place.category == selected_category)
     if selected_region:
@@ -210,10 +240,7 @@ def categories():
     if favorites_only == "on":
         query = query.filter(Place.id.in_([p.id for p in current_user.favorites]))
 
-    # Ratings filter is tricky because it's a calculated field.
-    # For now, we fetch all filtered, calculate avg, then paginate.
     all_filtered = query.all()
-
     final_list = []
     for place in all_filtered:
         place.avg_rating = round(sum(r.stars for r in place.ratings) / len(place.ratings), 1) if place.ratings else 0
@@ -221,29 +248,40 @@ def categories():
             continue
         final_list.append(place)
 
-    # Manual Pagination for the list
     total = len(final_list)
     start = (page - 1) * per_page
     end = start + per_page
     paginated_places = final_list[start:end]
-
-    # Calculate total pages
     total_pages = (total + per_page - 1) // per_page
 
-    # Helpers for the filter dropdowns
-    categories_list = [c[0] for c in db.session.query(Place.category).distinct()]
-    region_map = {"Tbilisi": "თბილისი", "Adjara": "აჭარა", "Abkhazia": "აფხაზეთი", "Samegrelo": "სამეგრელო",
-                  "Guria": "გურია", "Imereti": "იმერეთი", "Kakheti": "კახეთი", "Racha-Lechkhumi": "რაჭა-ლეჩხუმი",
-                  "Mtskheta-Mtianeti": "მცხეთა-მთიანეთი", "Samtskhe-Javakheti": "სამცხე-ჯავახეთი", "Svaneti": "სვანეთი",
-                  "Shida Kartli": "შიდა ქართლი", "Kvemo Kartli": "ქვემო ქართლი"}
-    regions_list = [(code, name) for code, name in region_map.items()]
+    # DYNAMIC CATEGORIES:
+    # If your DB stores keys like 'mountains', we map them for the display
+    raw_categories = [c[0] for c in db.session.query(Place.category).distinct()]
+    category_map_en = {'mountains': 'Mountains', 'waterfalls': 'Waterfalls', 'historic': 'Historic',
+                       'forests': 'Forests', 'views': 'Views', 'hiking': 'Hiking', 'lakes': 'Lakes',
+                       'sunrise': 'Sunrise'}
+    category_map_ge = {'mountains': 'მთები', 'waterfalls': 'ჩანჩქერები', 'historic': 'ისტორიული', 'forests': 'ტყეები',
+                       'views': 'ხედები', 'hiking': 'ლაშქრობა', 'lakes': 'ტბები', 'sunrise': 'მზის ამოსვლა'}
+
+    current_cat_map = category_map_en if lang == 'en' else category_map_ge
+    # Create list of tuples (database_value, display_name)
+    categories_list = [(cat, current_cat_map.get(cat, cat)) for cat in raw_categories]
+
+    # DYNAMIC REGIONS
+    region_map_ge = {"Tbilisi": "თბილისი", "Adjara": "აჭარა", "Abkhazia": "აფხაზეთი", "Samegrelo": "სამეგრელო",
+                     "Guria": "გურია", "Imereti": "იმერეთი", "Kakheti": "კახეთი", "Racha-Lechkhumi": "რაჭა-ლეჩხუმი",
+                     "Mtskheta-Mtianeti": "მცხეთა-მთიანეთი", "Samtskhe-Javakheti": "სამცხე-ჯავახეთი",
+                     "Svaneti": "სვანეთი", "Shida Kartli": "შიდა ქართლი", "Kvemo Kartli": "ქვემო ქართლი"}
+
+    # If English, we use the key as the name (e.g., "Tbilisi"), else we use the Georgian value
+    regions_list = [(code, code if lang == 'en' else name) for code, name in region_map_ge.items()]
 
     return render_template(
         "categories.html",
         places=paginated_places,
         page=page,
         total_pages=total_pages,
-        categories_list=categories_list,
+        categories_list=categories_list,  # Now returns list of tuples
         regions_list=regions_list,
         selected_category=selected_category,
         min_rating=min_rating,
@@ -256,14 +294,50 @@ def categories():
 @app.route("/add-place", methods=["GET", "POST"])
 @login_required
 def add_place():
+    # Detect language
+    lang = request.cookies.get('lang', 'ge')
     form = PlaceForm()
+
+    # 1. Update Form Labels & Choices based on language
+    if lang == 'en':
+        form.name.label.text = "Place Name"
+        form.description.label.text = "Description"
+        form.category.label.text = "Category"
+        form.region.label.text = "Region"
+        form.image.label.text = "Upload Photo"
+        form.submit.label.text = "Add Place"
+
+        # English Choices
+        form.category.choices = [
+            ('mountains', 'Mountains'), ('waterfalls', 'Waterfalls'),
+            ('historic', 'Historic'), ('forests', 'Forests'),
+            ('views', 'Views'), ('hiking', 'Hiking'),
+            ('lakes', 'Lakes'), ('sunrise', 'Sunrise')
+        ]
+        form.region.choices = [
+            ('Tbilisi', 'Tbilisi'), ('Adjara', 'Adjara'), ('Abkhazia', 'Abkhazia'),
+            ('Samegrelo', 'Samegrelo'), ('Guria', 'Guria'), ('Imereti', 'Imereti'),
+            ('Kakheti', 'Kakheti'), ('Racha-Lechkhumi', 'Racha-Lechkhumi'),
+            ('Mtskheta-Mtianeti', 'Mtskheta-Mtianeti'), ('Samtskhe-Javakheti', 'Samtskhe-Javakheti'),
+            ('Svaneti', 'Svaneti'), ('Shida Kartli', 'Shida Kartli'), ('Kvemo Kartli', 'Kvemo Kartli')
+        ]
+    else:
+        # Default labels are already in Georgian in your form class,
+        # but we re-declare them here for consistency
+        form.name.label.text = "ადგილის სახელი"
+        form.description.label.text = "აღწერა"
+        form.category.label.text = "კატეგორია"
+        form.region.label.text = "რეგიონი"
+        form.image.label.text = "ატვირთე ფოტო"
+        form.submit.label.text = "დაამატე ადგილი"
+
     if form.validate_on_submit():
         place_name = form.name.data.strip()
-
         existing_place = Place.query.filter(Place.name.ilike(place_name)).first()
 
         if existing_place:
-            flash(f"ადგილი სახელით '{place_name}' უკვე არსებობს ბაზაში!", "warning")
+            msg = f"Place '{place_name}' already exists!" if lang == 'en' else f"ადგილი სახელით '{place_name}' უკვე არსებობს ბაზაში!"
+            flash(msg, "warning")
             return render_template("add-place.html", form=form)
 
         filename = None
@@ -271,18 +345,17 @@ def add_place():
             filename = secure_filename(form.image.data.filename)
             form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-        # 3. Handle Coordinates
         latitude = request.form.get("latitude")
         longitude = request.form.get("longitude")
 
         if not latitude or not longitude:
-            flash("გთხოვ აირჩიე ადგილი რუკაზე", "danger")
+            msg = "Please select a location on the map" if lang == 'en' else "გთხოვ აირჩიე ადგილი რუკაზე"
+            flash(msg, "danger")
             return render_template("add-place.html", form=form)
 
-        # 4. Save the New Place
         try:
             place = Place(
-                name=place_name,  # Use the cleaned name
+                name=place_name,
                 description=form.description.data,
                 category=form.category.data,
                 region=form.region.data,
@@ -294,12 +367,15 @@ def add_place():
 
             db.session.add(place)
             db.session.commit()
-            flash("ადგილი წარმატებით დაემატა!", "success")
+
+            msg = "Place added successfully!" if lang == 'en' else "ადგილი წარმატებით დაემატა!"
+            flash(msg, "success")
             return redirect(url_for("categories"))
 
         except Exception as e:
             db.session.rollback()
-            flash("მოხდა შეცდომა შენახვისას.", "danger")
+            msg = "An error occurred while saving." if lang == 'en' else "მოხდა შეცდომა შენახვისას."
+            flash(msg, "danger")
             print(f"Error: {e}")
 
     return render_template("add-place.html", form=form)
@@ -406,6 +482,7 @@ def booking():
 
 
 @app.route("/contact", methods=["GET", "POST"])
+@login_required
 def contact():
     if request.method == "POST":
         name = request.form["name"]

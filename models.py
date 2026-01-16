@@ -48,10 +48,11 @@ class Route(db.Model):
 
 
 class Place(db.Model):
+    __tablename__ = 'place'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(150), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    category = db.Column(db.String(50), nullable=False)
+    category = db.Column(db.String(100))
     region = db.Column(db.String(50))
     image = db.Column(db.String(200))
     latitude = db.Column(db.Float, nullable=True)
@@ -61,6 +62,7 @@ class Place(db.Model):
     user = db.relationship('User', backref='places')
 
     ratings = db.relationship('Rating', backref='place', lazy=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
 
     def __repr__(self):
         return f"<Place {self.name}>"
@@ -95,11 +97,12 @@ class Spot(db.Model):
     lng = db.Column(db.Float)
 
 class Category(db.Model):
+    __tablename__ = 'category'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     icon = db.Column(db.String(50))
     count = db.Column(db.Integer)
-
+    places = db.relationship('Place', backref='category_obj', lazy=True)
 
 class PlannedRoute(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -1,15 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}GreenSpots — Dashboard{% endblock %}
+{% block title %}GreenSpots — {% if g.lang=='en' %}Dashboard{% else %}მთავარი გვერდი{% endif %}{% endblock %}
 
 {% block css %}
-<script>
-    // This MUST run before any CSS loads to prevent the white flash
-    (function() {
-        const savedTheme = localStorage.getItem('gs-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
-</script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
@@ -19,24 +12,28 @@
 {% endblock %}
 
 {% block content %}
-<!-- Hero / Welcome Section -->
 <section class="hero-section py-5 mt-5 text-center">
     <div class="container">
-        <h1 class="hero-title">გამარჯობა, {{ current_user.username }}!</h1>
-        <p class="hero-slogan-georgian">აღმოაჩინე საქართველოს დაფარული მარგალიტები, რომლებიც შენს გემოვნებას შეეფერება</p>
-        <p class="hero-subtitle">Your personalized adventure starts here.</p>
+        <h1 class="hero-title">
+            {% if g.lang=='en' %}Hello, {{ current_user.username }}!{% else %}გამარჯობა, {{ current_user.username }}!{% endif %}
+        </h1>
+        <p class="hero-slogan-georgian">
+            {% if g.lang=='en' %}Discover Georgia's hidden gems that match your taste{% else %}აღმოაჩინე საქართველოს დაფარული მარგალიტები, რომლებიც შენს გემოვნებას შეეფერება{% endif %}
+        </p>
+        <p class="hero-subtitle">
+            {% if g.lang=='en' %}Your personalized adventure starts here.{% else %}შენი პერსონალიზებული თავგადასავალი აქ იწყება.{% endif %}
+        </p>
 
         <div class="d-flex justify-content-center gap-2 mt-4">
-            <input type="text" class="form-control form-control-lg w-75" placeholder="მოძებნეთ ადგილები..." disabled>
-            <button class="btn btn-primary-green btn-lg">ძებნა</button>
+            <input type="text" class="form-control form-control-lg w-75" placeholder="{% if g.lang=='en' %}Search places...{% else %}მოძებნეთ ადგილები...{% endif %}" disabled>
+            <button class="btn btn-primary-green btn-lg">{% if g.lang=='en' %}Search{% else %}ძებნა{% endif %}</button>
         </div>
     </div>
 </section>
 
-<!-- Suggested Spots Section -->
 <section id="suggestions" class="featured-section py-5 bg-light">
     <div class="container">
-        <h2 class="mb-4">შეფასებული ადგილები შენთვის</h2>
+        <h2 class="mb-4">{% if g.lang=='en' %}Recommended Places for You{% else %}შეფასებული ადგილები შენთვის{% endif %}</h2>
 
         {% if suggested_places %}
         <div class="suggested-slider">
@@ -71,16 +68,15 @@
             {% endfor %}
         </div>
         {% else %}
-        <p>ამ კატეგორიაში ჯერ არ არის ადგილები.</p>
+        <p>{% if g.lang=='en' %}No places in this category yet.{% else %}ამ კატეგორიაში ჯერ არ არის ადგილები.{% endif %}</p>
         {% endif %}
     </div>
 </section>
 
 
-<!-- Favorites Section -->
 <section id="favorites" class="categories-section py-5">
     <div class="container">
-        <h2 class="mb-4">თქვენი ფავორიტები</h2>
+        <h2 class="mb-4">{% if g.lang=='en' %}Your Favorites{% else %}თქვენი ფავორიტები{% endif %}</h2>
 
         {% if favorites_to_show %}
         <div class="favorites-slider">
@@ -92,7 +88,7 @@
                         <h5 class="card-title">{{ favorite.name }}</h5>
                         <form method="POST" action="{{ url_for('toggle_favorite', place_id=favorite.id) }}">
                             <button type="submit" class="btn btn-sm btn-outline-green">
-                                <i class="bi bi-heart-fill text-danger"></i> წაშლა
+                                <i class="bi bi-heart-fill text-danger"></i> {% if g.lang=='en' %}Remove{% else %}წაშლა{% endif %}
                             </button>
                         </form>
                     </div>
@@ -101,35 +97,40 @@
             {% endfor %}
         </div>
         {% else %}
-        <p>თქვენ ჯერ არ გაქვთ ფავორიტები.</p>
+        <p>{% if g.lang=='en' %}You don't have any favorites yet.{% else %}თქვენ ჯერ არ გაქვთ ფავორიტები.{% endif %}</p>
         {% endif %}
     </div>
 </section>
 
-<!-- Profile / Quick Stats Section -->
 <section id="profile" class="how-section py-5">
     <div class="container">
-        <a href="{{ url_for('profile') }}" class="mb-4 d-block" style="text-decoration: none; color: inherit; font-size: large;">თქვენი პროფილი</a>
+        <a href="{{ url_for('profile') }}" class="mb-4 d-block" style="text-decoration: none; color: inherit; font-size: large;">
+            {% if g.lang=='en' %}Your Profile{% else %}თქვენი პროფილი{% endif %}
+        </a>
         <div class="row">
             <div class="col-md-4 mb-3">
                 <div class="card text-center p-3 h-100">
                     <i class="bi bi-person-circle fs-1 mb-2"></i>
                     <h5>{{ current_user.username }}</h5>
-                    <p>მომხმარებელი ID: {{ current_user.id }}</p>
+                    <p>{% if g.lang=='en' %}User ID{% else %}მომხმარებელი ID{% endif %}: {{ current_user.id }}</p>
                 </div>
             </div>
             <div class="col-md-4 mb-3">
                 <div class="card text-center p-3 h-100">
                     <i class="bi bi-heart fs-1 mb-2"></i>
-                    <h5>ფავორიტები</h5>
-                    <p>{{ current_user.favorites|length }} ადგილი შენახულია</p>
+                    <h5>{% if g.lang=='en' %}Favorites{% else %}ფავორიტები{% endif %}</h5>
+                    <p>
+                        {% if g.lang=='en' %}{{ current_user.favorites|length }} places saved{% else %}{{ current_user.favorites|length }} ადგილი შენახულია{% endif %}
+                    </p>
                 </div>
             </div>
             <div class="col-md-4 mb-3">
                 <div class="card text-center p-3 h-100">
                     <i class="bi bi-map fs-1 mb-2"></i>
-                    <h5>გეგმები</h5>
-                    <p>{{ current_user.routes|length }} მარშრუტი დაგეგმილი</p>
+                    <h5>{% if g.lang=='en' %}Plans{% else %}გეგმები{% endif %}</h5>
+                    <p>
+                        {% if g.lang=='en' %}{{ current_user.routes|length }} routes planned{% else %}{{ current_user.routes|length }} მარშრუტი დაგეგმილი{% endif %}
+                    </p>
                 </div>
             </div>
         </div>
@@ -163,33 +164,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <script>
 $('.suggested-slider').slick({
-  slidesToShow: 4,       // number of cards on desktop
+  slidesToShow: 4,
   slidesToScroll: 1,
   autoplay: true,
-  autoplaySpeed: 2500,   // 2.5 seconds
-  dots: true,            // navigation dots
-  arrows: true,          // prev/next arrows
+  autoplaySpeed: 2500,
+  dots: true,
+  arrows: true,
   responsive: [
-    {
-      breakpoint: 992,   // tablets
-      settings: { slidesToShow: 3 }
-    },
-    {
-      breakpoint: 768,   // small tablets / large phones
-      settings: { slidesToShow: 2 }
-    },
-    {
-      breakpoint: 576,   // phones
-      settings: { slidesToShow: 1 }
-    }
+    { breakpoint: 992, settings: { slidesToShow: 3 } },
+    { breakpoint: 768, settings: { slidesToShow: 2 } },
+    { breakpoint: 576, settings: { slidesToShow: 1 } }
   ]
 });
-</script>
 
-<script>
-    $(document).ready(function(){
+$(document).ready(function(){
     $('.favorites-slider').slick({
-        slidesToShow: 4,       // adjust as needed
+        slidesToShow: 4,
         slidesToScroll: 1,
         autoplay: true,
         autoplaySpeed: 2500,
@@ -205,14 +195,12 @@ $('.suggested-slider').slick({
 </script>
 
 <script>
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-fetch(`/toggle_favorite/${placeId}`, {
-    method: "POST",
-    headers: {
-        "X-CSRFToken": csrfToken,
-        "Content-Type": "application/json"
+    // Ensure CSRF logic exists if your app requires it
+    const csrfElement = document.querySelector('meta[name="csrf-token"]');
+    if (csrfElement) {
+        const csrfToken = csrfElement.getAttribute('content');
+        // Example for fetch usage with CSRF:
+        // headers: { "X-CSRFToken": csrfToken, ... }
     }
-})
-
 </script>
 {%endblock%}

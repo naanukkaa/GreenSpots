@@ -1,151 +1,62 @@
 <!DOCTYPE html>
-<html lang="ka">
+<html lang="{{ g.lang or 'ge' }}">
 <head>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenSpots — ავტორიზაცია</title>
-    <!-- Bootstrap CSS -->
+    <title>GreenSpots — {% if g.lang=='en' %}Login{% else %}ავტორიზაცია{% endif %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
-    <script>
-    // This MUST run before any CSS loads to prevent the white flash
-    (function() {
-        const savedTheme = localStorage.getItem('gs-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
-</script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <style>
-    .auth-container {
-        display: flex;
-        height: 100vh;
-    }
-    .auth-left {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 50px;
-        background-color: #f5f5f5;
-    }
-    .auth-left h2 {
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-    .auth-left p {
-        color: #555;
-        margin-bottom: 30px;
-    }
-    .auth-left .form-control {
-        margin-bottom: 15px;
-    }
-    .auth-left button {
-        background-color: #2b9348;
-        color: white;
-        border: none;
-    }
-    .auth-left a {
-        color: #2b9348;
-        text-decoration: none;
-    }
-    .auth-right {
-        flex: 1;
-        background-image: url('{{ url_for("static", filename="img/auth-bg.jpg") }}');
-        background-size: cover;
-        background-position: center;
-    }
-    @media (max-width: 768px) {
-        .auth-container {
-            flex-direction: column;
-        }
-        .auth-right {
-            height: 40vh;
-        }
-    }
-
-    .auth-header {
-        position: absolute;
-        top: 24px;
-        left: 32px;
-        z-index: 10;
-    }
-
-    .auth-header .brand {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 18px;
-        color: #2e7d32; /* match your green */
-    }
-
-    .auth-header img {
-        width: 28px;
-        height: 28px;
-    }
+        .auth-container { display: flex; min-height: 100vh; padding-top: 80px; } /* Added padding for header */
+        .auth-left { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 50px; background-color: #f5f5f5; }
+        .auth-left h2 { font-weight: bold; margin-bottom: 10px; }
+        .auth-left p { color: #555; margin-bottom: 30px; }
+        .auth-left .form-control { margin-bottom: 15px; }
+        .auth-left button { background-color: #2b9348; color: white; border: none; }
+        .auth-left a { color: #2b9348; text-decoration: none; }
+        .auth-right { flex: 1; background-image: url('{{ url_for("static", filename="img/login.jpg") }}'); background-size: cover; background-position: center; }
+        @media (max-width: 768px) { .auth-container { flex-direction: column; } .auth-right { height: 40vh; } }
     </style>
 </head>
 <body>
-    <header class="auth-header">
-        <a href="{{ url_for('index') }}" class="brand">
-            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo">
-            <span>GreenSpots</span>
-        </a>
-    </header>
-    <div class="auth-container">
+    {% include "header.html" %}
 
-        <!-- LEFT: Form -->
+    <div class="auth-container">
         <div class="auth-left">
-                {% with messages = get_flashed_messages() %}
-                  {% if messages %}
-                    <div class="container mt-3">
-                      {% for message in messages %}
-                        <div class="alert alert-info">{{ message }}</div>
-                      {% endfor %}
-                    </div>
-                  {% endif %}
-                {% endwith %}
-            <h2>კეთილი იყოს შენი დაბრუნება</h2>
-            <p>აღმოაჩინე საქართველო ჩვენთან ერთად 🌿</p>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="container mt-3">
+                  {% for message in messages %}
+                    <div class="alert alert-info">{{ message }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+            <h2>{% if g.lang=='en' %}Welcome Back{% else %}კეთილი იყოს შენი დაბრუნება{% endif %}</h2>
+            <p>{% if g.lang=='en' %}Discover Georgia with us 🌿{% else %}აღმოაჩინე საქართველო ჩვენთან ერთად 🌿{% endif %}</p>
 
             <form method="POST">
                 {{ form.hidden_tag() }}
                 <input type="email" name="email" placeholder="example@email.com" class="form-control" required>
                 <input type="password" name="password" placeholder="••••••••" class="form-control" required>
-                <button type="submit" class="btn w-100 mt-2">შესვლა</button>
+                <button type="submit" class="btn w-100 mt-2">{% if g.lang=='en' %}Login{% else %}შესვლა{% endif %}</button>
             </form>
 
-            <div class="mt-3">
-                ან
-            </div>
-
+            <div class="mt-3">{% if g.lang=='en' %}or{% else %}ან{% endif %}</div>
             <div class="mt-2">
-                <a href="{{ url_for('auth_bp.register') }}">არ გაქვს ანგარიში? <strong>რეგისტრაცია</strong></a>
+                <a href="{{ url_for('auth_bp.register') }}">
+                    {% if g.lang=='en' %}Don't have an account? <strong>Register</strong>{% else %}არ გაქვს ანგარიში? <strong>რეგისტრაცია</strong>{% endif %}
+                </a>
             </div>
         </div>
-
-        <!-- RIGHT: Image -->
-        <div class="auth-right" style="
-            flex: 1;
-            background-image: url('{{ url_for('static', filename='img/login.jpg') }}');
-            background-size: cover;
-            background-position: center;
-        ">
-        </div>
-
+        <div class="auth-right"></div>
     </div>
 
-<!-- Footer -->
-{% include "footer.html" %}
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% include "footer.html" %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

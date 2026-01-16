@@ -1,31 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ g.lang or 'ge' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenSpots — Discover Georgia's Hidden Natural Treasures</title>
-    <meta name="description" content="Explore Georgia's most beautiful natural and historical locations. A community-driven eco-tourism platform for discovering hidden spots, waterfalls, mountains, and more.">
+    <title>{% if g.lang=='en' %}GreenSpots — Discover Georgia's Hidden Natural Treasures{% else %}GreenSpots — აღმოაჩინე საქართველოს დამალული საგანძური{% endif %}</title>
+    <meta name="description" content="{% if g.lang=='en' %}Explore Georgia's most beautiful natural and historical locations. A community-driven eco-tourism platform for discovering hidden spots, waterfalls, mountains, and more.{% else %}აღმოაჩინეთ საქართველოს ულამაზესი ბუნებრივი და ისტორიული ადგილები. საზოგადოებაზე ორიენტირებული ეკოტურისტული პლატფორმა დამალული ადგილების გასაცნობად.{% endif %}">
     <meta name="keywords" content="Georgia tourism, eco-tourism, hidden spots, nature, travel, Caucasus, hiking, waterfalls, mountains">
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
-    <script>
-        const savedTheme = localStorage.getItem('gs-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo.png') }}">
 </head>
 <body>
-<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-greenspots fixed-top">
     <div class="container">
         <a class="navbar-brand" href="#">
@@ -39,20 +30,21 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mx-auto">
-                <li class="nav-item"><a class="nav-link" href="#explore">აღმოაჩინე</a></li>
-                <li class="nav-item"><a class="nav-link" href="#categories">კატეგორიები</a></li>
-                <li class="nav-item"><a class="nav-link" href="#how-it-works">როგორ მუშაობს?</a></li>
-                <li class="nav-item"><a class="nav-link" href="#about">ჩვენს შესახებ</a></li>
+                <li class="nav-item"><a class="nav-link" href="#explore">{% if g.lang=='en' %}Explore{% else %}აღმოაჩინე{% endif %}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#categories">{% if g.lang=='en' %}Categories{% else %}კატეგორიები{% endif %}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#how-it-works">{% if g.lang=='en' %}How It Works?{% else %}როგორ მუშაობს?{% endif %}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#about">{% if g.lang=='en' %}About Us{% else %}ჩვენს შესახებ{% endif %}</a></li>
             </ul>
-            <div class="d-flex gap-2">
-                <a href="{{ url_for('auth_bp.login') }}"><button class="btn btn-outline-green">ავტორიზაცია</button></a>
-                <a href="{{ url_for('auth_bp.register') }}"><button class="btn btn-primary-green">რეგისტრაცია</button></a>
+            <div class="d-flex gap-2 align-items-center">
+                <button id="lang-toggle" class="btn btn-outline-green btn-sm px-3">{% if g.lang == 'en' %}EN{% else %}GE{% endif %}</button>
+
+                <a href="{{ url_for('auth_bp.login') }}"><button class="btn btn-outline-green">{% if g.lang=='en' %}Login{% else %}ავტორიზაცია{% endif %}</button></a>
+                <a href="{{ url_for('auth_bp.register') }}"><button class="btn btn-primary-green">{% if g.lang=='en' %}Register{% else %}რეგისტრაცია{% endif %}</button></a>
             </div>
         </div>
     </div>
 </nav>
 
-<!-- Hero Section -->
 <section class="hero-section">
     <div class="hero-bg">
         <img src="{{ url_for('static', filename='img/hero-georgia.jpg') }}" alt="Georgian Mountains">
@@ -63,24 +55,24 @@
     <div class="floating-orb floating-orb-2"></div>
 
     <div class="hero-content">
-        <div class="hero-badge"><i class="bi bi-compass"></i><span>აღმოაჩინე საქართველოს დამალული, ისტორიებით სავსე ადგილები</span></div>
+        <div class="hero-badge"><i class="bi bi-compass"></i><span>{% if g.lang=='en' %}Discover Georgia's hidden historic places{% else %}აღმოაჩინე საქართველოს დამალული, ისტორიებით სავსე ადგილები{% endif %}</span></div>
         <h1 class="hero-title">GreenSpots</h1>
-        <p class="hero-slogan-georgian">აღმოაჩინე საქართველო, გაავრცელე ემოცია, იყავი სხვისთვის გიდი</p>
-        <p class="hero-subtitle">Discover Georgia, Share the Emotion, Be a Guide for Others</p>
+        <p class="hero-slogan-georgian">{% if g.lang=='en' %}Discover Georgia, Share the Emotion, Be a Guide for Others{% else %}აღმოაჩინე საქართველო, გაავრცელე ემოცია, იყავი სხვისთვის გიდი{% endif %}</p>
+        {% if g.lang != 'en' %}<p class="hero-subtitle">Discover Georgia, Share the Emotion, Be a Guide for Others</p>{% endif %}
 
         <div class="hero-search">
             <form method="GET" action="{{ url_for('index') }}">
                 <div class="search-box">
                     <i class="bi bi-search ms-3 text-muted"></i>
-                    <input type="text" name="search" placeholder="მოძებნეთ ჩანჩქერები, გამოქვაბულები..." value="{{ request.args.get('search','') }}">
+                    <input type="text" name="search" placeholder="{% if g.lang=='en' %}Search waterfalls, caves...{% else %}მოძებნეთ ჩანჩქერები, გამოქვაბულები...{% endif %}" value="{{ request.args.get('search','') }}">
                     <select name="region" class="d-none d-sm-block">
-                        <option>ყველა რეგიონი</option>
+                        <option>{% if g.lang=='en' %}All Regions{% else %}ყველა რეგიონი{% endif %}</option>
                         <option disabled>კახეთი</option>
                         <option disabled>სვანეთი</option>
                         <option disabled>სამეგრელო</option>
                         <option disabled>აჭარა</option>
                     </select>
-                    <button class="btn btn-primary-green" type="submit">აღმოაჩინე</button>
+                    <button class="btn btn-primary-green" type="submit">{% if g.lang=='en' %}Explore{% else %}აღმოაჩინე{% endif %}</button>
                 </div>
             </form>
         </div>
@@ -98,14 +90,14 @@
                     <div class="hero-number">
                         <span class="counter" data-target="{{ categories_count }}">0</span>
                     </div>
-                    <div class="hero-label">კატეგორია</div>
+                    <div class="hero-label">{% if g.lang=='en' %}Categories{% else %}კატეგორია{% endif %}</div>
                 </div>
 
                 <div class="hero-stat">
                     <div class="hero-number">
                         <span class="counter" data-target="{{ users_count }}">0</span>+
                     </div>
-                    <div class="hero-label">მომხმარებელი</div>
+                    <div class="hero-label">{% if g.lang=='en' %}Users{% else %}მომხმარებელი{% endif %}</div>
                 </div>
             </div>
         </div>
@@ -113,13 +105,12 @@
     <div class="scroll-indicator"><div><span></span></div></div>
 </section>
 
-<!-- Featured Spots Section -->
 <section class="featured-section" id="explore">
     <div class="container">
         <div class="section-header animate-on-scroll">
-            <span class="section-label">რეკომენდებული მიმართულებები</span>
-            <h2 class="section-title">აღმოაჩინეთ საქართველოს დაფარული საგანძური</h2>
-            <p class="section-description">ჩვენი საზოგადოების მიერ შერჩეული ადგილები. თითოეული ადგილი დადასტურებულია რეალური ვიზიტორების გამოცდილებით.</p>
+            <span class="section-label">{% if g.lang=='en' %}Recommended Destinations{% else %}რეკომენდებული მიმართულებები{% endif %}</span>
+            <h2 class="section-title">{% if g.lang=='en' %}Discover Georgia's Hidden Treasures{% else %}აღმოაჩინეთ საქართველოს დაფარული საგანძური{% endif %}</h2>
+            <p class="section-description">{% if g.lang=='en' %}Curated spots by our community, verified by real visitors.{% else %}ჩვენი საზოგადოების მიერ შერჩეული ადგილები. თითოეული ადგილი დადასტურებულია რეალური ვიზიტორების გამოცდილებით.{% endif %}</p>
         </div>
 
         <div class="spot-carousel">
@@ -133,7 +124,7 @@
                     {% if spot.avg_rating - (spot.avg_rating|int) >= 0.5 %}½{% endif %}
                     ({{ '%.1f' % spot.avg_rating }})
                 {% else %}
-                    შეფასება არ არის
+                    {% if g.lang=='en' %}No Rating{% else %}შეფასება არ არის{% endif %}
                 {% endif %}
               </p>
             </div>
@@ -142,12 +133,11 @@
     </div>
 
         <div class="text-center mt-4">
-            <button class="btn btn-outline-green btn-lg">იხილეთ ყველა</button>
+            <button class="btn btn-outline-green btn-lg">{% if g.lang=='en' %}View All{% else %}იხილეთ ყველა{% endif %}</button>
         </div>
     </div>
 </section>
 
-<!-- Categories Section -->
 <section class="categories-section" id="categories">
     <div class="container">
         <div class="row">
@@ -155,10 +145,18 @@
             <div class="col-6 col-md-3 animate-on-scroll">
                 <button class="category-card">
                     <div class="category-icon" style="background: linear-gradient(135deg, #3a6b4a, #4a7d5a);">
-                        <img src="{{ url_for('static', filename='icons/' + category.icon) }}" alt="{{ category.name }}" style="width: 36px; height: 36px; filter: invert(1) brightness(2);">
+                        <img src="{{ url_for('static', filename='icons/' + category.icon) }}"
+                             alt="{% if g.lang=='en' %}{{ category.en_name }}{% else %}{{ category.name }}{% endif %}"
+                             style="width: 36px; height: 36px; filter: invert(1) brightness(2);">
                     </div>
-                    <h3 class="category-title">{{ category.name }}</h3>
-                    <p class="category-count">{{ category.count }} ადგილი</p>
+
+                    <h3 class="category-title">
+                        {% if g.lang=='en' %}{{ category.en_name }}{% else %}{{ category.name }}{% endif %}
+                    </h3>
+
+                    <p class="category-count">
+                        {{ category.count }} {% if g.lang=='en' %}places{% else %}ადგილი{% endif %}
+                    </p>
                     <div class="category-arrow"><i class="bi bi-chevron-right"></i></div>
                 </button>
             </div>
@@ -167,51 +165,49 @@
     </div>
 </section>
 
-<!-- Map Section -->
 <section class="map-section">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6 mb-5 mb-lg-0">
                 <div class="map-content animate-on-scroll">
-                    <span class="section-label" style="color: var(--accent);">ინტერაქტიული გამოცდილება</span>
-                    <h2>რუკაზე დათვალიერება</h2>
-                    <p>ჩვენი ინტერაქტიული რუკა საშუალებას გაძლევთ აღმოაჩინოთ ადგილები საქართველოს ყველა რეგიონში. გაფილტრეთ კატეგორიის მიხედვით, იხილეთ დეტალური ინფორმაცია და დაგეგმეთ თქვენთვის იდეალური მარშრუტი.</p>
+                    <span class="section-label" style="color: var(--accent);">{% if g.lang=='en' %}Interactive Experience{% else %}ინტერაქტიული გამოცდილება{% endif %}</span>
+                    <h2>{% if g.lang=='en' %}Explore on the Map{% else %}რუკაზე დათვალიერება{% endif %}</h2>
+                    <p>{% if g.lang=='en' %}Our interactive map allows you to explore locations in all regions of Georgia. Filter by category, view detailed info, and plan your perfect route.{% else %}ჩვენი ინტერაქტიული რუკა საშუალებას გაძლევთ აღმოაჩინოთ ადგილები საქართველოს ყველა რეგიონში. გაფილტრეთ კატეგორიის მიხედვით, იხილეთ დეტალური ინფორმაცია და დაგეგმეთ თქვენთვის იდეალური მარშრუტი.{% endif %}</p>
 
                     <ul class="map-features">
-                        <li><div class="map-feature-icon"><i class="bi bi-funnel"></i></div><span>ფილტრები კატეგორიებისა და ფუნქციებისთვის</span></li>
-                        <li><div class="map-feature-icon"><i class="bi bi-layers"></i></div><span>რუკის მრავალი ფენა და სატელიტის ჩვენება</span></li>
-                        <li><div class="map-feature-icon"><i class="bi bi-geo-alt"></i></div><span>შეინახეთ ფავორიტები და შექმენით მოგზაურობის მარშრუტები</span></li>
+                        <li><div class="map-feature-icon"><i class="bi bi-funnel"></i></div><span>{% if g.lang=='en' %}Filters by categories and functions{% else %}ფილტრები კატეგორიებისა და ფუნქციებისთვის{% endif %}</span></li>
+                        <li><div class="map-feature-icon"><i class="bi bi-layers"></i></div><span>{% if g.lang=='en' %}Multiple map layers and satellite display{% else %}რუკის მრავალი ფენა და სატელიტის ჩვენება{% endif %}</span></li>
+                        <li><div class="map-feature-icon"><i class="bi bi-geo-alt"></i></div><span>{% if g.lang=='en' %}Save favorites and create travel routes{% else %}შეინახეთ ფავორიტები და შექმენით მოგზაურობის მარშრუტები{% endif %}</span></li>
                     </ul>
 
-                    <button class="btn btn-hero"><i class="bi bi-fullscreen me-2"></i> გახსენით მთლიანი რუკა</button>
+                    <button class="btn btn-hero"><i class="bi bi-fullscreen me-2"></i> {% if g.lang=='en' %}Open Full Map{% else %}გახსენით მთლიანი რუკა{% endif %}</button>
                 </div>
             </div>
 
             <div class="col-lg-6">
                 <div class="map-preview animate-on-scroll">
                     <div class="map-grid"></div>
-                    <div class="map-center-message"><i class="bi bi-geo-alt"></i><h4>ინტერაქტიული რუკა</h4><p>მალე</p></div>
+                    <div class="map-center-message"><i class="bi bi-geo-alt"></i><h4>{% if g.lang=='en' %}Interactive Map{% else %}ინტერაქტიული რუკა{% endif %}</h4><p>{% if g.lang=='en' %}Soon{% else %}მალე{% endif %}</p></div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- How It Works Section -->
 <section class="how-section" id="how-it-works">
     <div class="container">
         <div class="section-header animate-on-scroll">
-            <span class="section-label">მარტივი პროცესი</span>
-            <h2 class="section-title">როგორ მუშაობს GreenSpots</h2>
-            <p class="section-description">შემოგვიერთდით ჩვენს მკვლევართა საზოგადოებაში და დაგვეხმარეთ საქართველოს ბუნებრივი საოცრებების საუკეთესო გზამკვლევის შექმნაში.</p>
+            <span class="section-label">{% if g.lang=='en' %}Simple Process{% else %}მარტივი პროცესი{% endif %}</span>
+            <h2 class="section-title">{% if g.lang=='en' %}How GreenSpots Works{% else %}როგორ მუშაობს GreenSpots{% endif %}</h2>
+            <p class="section-description">{% if g.lang=='en' %}Join our explorer community and help us create the best guide to Georgia's natural wonders.{% else %}შემოგვიერთდით ჩვენს მკვლევართა საზოგადოებაში და დაგვეხმარეთ საქართველოს ბუნებრივი საოცრებების საუკეთესო გზამკვლევის შექმნაში.{% endif %}</p>
         </div>
 
         <div class="row">
             {% for step in [
-                {'num':1,'icon':'search','title':'აღმოაჩინეთ','desc':'დაათვალიერეთ ჩვენი ინტერაქტიული რუკა ან მოძებნეთ კონკრეტული ტიპის მდებარეობები. გაფილტრეთ რეგიონის, კატეგორიის ან მახასიათებლების მიხედვით.'},
-                {'num':2,'icon':'signpost-2','title':'გეგმა','desc':'მიიღეთ დეტალური ინფორმაცია, მათ შორის მიმართულებები, ვიზიტის საუკეთესო დრო და პრაქტიკული რჩევები რეალური ვიზიტორებისგან.'},
-                {'num':3,'icon':'pin-map','title':'წვლილი შეიტანეთ','desc':'იპოვეთ დამალული საგანძური? დაამატეთ ის რუკაზე ფოტოებით, აღწერილობებით და სხვა მოგზაურებისთვის სასარგებლო სამკერდე ნიშნებით.'},
-                {'num':4,'icon':'share','title':'გააზიარეთ','desc':'დაეხმარეთ სხვებს საქართველოს სილამაზის აღმოჩენაში. შეაფასეთ ადგილები, დატოვეთ მიმოხილვები და გაუზიარეთ თქვენი გამოცდილება.'}
+                {'num':1,'icon':'search','title_ge':'აღმოაჩინეთ','title_en':'Discover','desc_ge':'დაათვალიერეთ ჩვენი ინტერაქტიული რუკა ან მოძებნეთ კონკრეტული ტიპის მდებარეობები. გაფილტრეთ რეგიონის, კატეგორიის ან მახასიათებლების მიხედვით.', 'desc_en':'Explore our interactive map or search for specific types of locations. Filter by region, category, or features.'},
+                {'num':2,'icon':'signpost-2','title_ge':'გეგმა','title_en':'Plan','desc_ge':'მიიღეთ დეტალური ინფორმაცია, მათ შორის მიმართულებები, ვიზიტის საუკეთესო დრო და პრაქტიკული რჩევები რეალური ვიზიტორებისგან.', 'desc_en':'Get detailed info including directions, best time to visit, and practical tips from real visitors.'},
+                {'num':3,'icon':'pin-map','title_ge':'წვლილი შეიტანეთ','title_en':'Contribute','desc_ge':'იპოვეთ დამალული საგანძური? დაამატეთ ის რუკაზე ფოტოებით, აღწერილობებით და სხვა მოგზაურებისთვის სასარგებლო სამკერდე ნიშნებით.', 'desc_en':'Found a hidden treasure? Add it to the map with photos, descriptions, and useful tags for other travelers.'},
+                {'num':4,'icon':'share','title_ge':'გააზიარეთ','title_en':'Share','desc_ge':'დაეხმარეთ სხვებს საქართველოს სილამაზის აღმოჩენაში. შეაფასეთ ადგილები, დატოვეთ მიმოხილვები და გაუზიარეთ თქვენი გამოცდილება.', 'desc_en':'Help others discover the beauty of Georgia. Rate places, leave reviews, and share your experiences.'}
                 ] %}
             <div class="col-md-6 col-lg-3 animate-on-scroll">
                 <div class="step-card">
@@ -221,20 +217,19 @@
                         </div>
                         <span class="step-number">{{ step.num }}</span>
                     </div>
-                    <h3 class="step-title">{{ step.title }}</h3>
-                    <p class="step-description">{{ step.desc }}</p>
+                    <h3 class="step-title">{% if g.lang=='en' %}{{ step.title_en }}{% else %}{{ step.title_ge }}{% endif %}</h3>
+                    <p class="step-description">{% if g.lang=='en' %}{{ step.desc_en }}{% else %}{{ step.desc_ge }}{% endif %}</p>
                 </div>
             </div>
             {% endfor %}
         </div>
 
         <div class="text-center mt-5">
-            <button class="btn btn-primary-green btn-lg">დაიწყე აღმოჩენა!</button>
+            <button class="btn btn-primary-green btn-lg">{% if g.lang=='en' %}Start Exploring!{% else %}დაიწყე აღმოჩენა!{% endif %}</button>
         </div>
     </div>
 </section>
 
-<!-- Footer -->
 <footer id="about">
     <section class="cta-section" style="position: relative; overflow: hidden; padding: 80px 0; color: white;">
         <video autoplay muted loop playsinline id="footer-video"
@@ -245,11 +240,11 @@
         <div class="overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 46, 34, 0.7); z-index: 1;"></div>
 
         <div class="container" style="position: relative; z-index: 2; text-align: center;">
-            <h2 style="font-size: 50px; margin-bottom: 20px;">იცით ფარული ადგილი?</h2>
-            <p style="margin-bottom: 30px; font-size: 20px;">გაუზიარეთ თქვენი აღმოჩენები საზოგადოებას.</p>
+            <h2 style="font-size: 50px; margin-bottom: 20px;">{% if g.lang=='en' %}Know a hidden spot?{% else %}იცით ფარული ადგილი?{% endif %}</h2>
+            <p style="margin-bottom: 30px; font-size: 20px;">{% if g.lang=='en' %}Share your discoveries with the community.{% else %}გაუზიარეთ თქვენი აღმოჩენები საზოგადოებას.{% endif %}</p>
             <a href="{{ url_for('add_place') }}" class="btn btn-primary"
                style="background-color: #d4a373; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold;">
-               დაამატეთ თქვენი ადგილი
+               {% if g.lang=='en' %}Add your place{% else %}დაამატეთ თქვენი ადგილი{% endif %}
             </a>
         </div>
     </section>
@@ -262,7 +257,7 @@
                         <div class="brand-icon"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo" width="30" height="30"></div>
                         GreenSpots
                     </a>
-                    <p class="footer-description">საზოგადოებაზე ორიენტირებული პლატფორმა საქართველოს ულამაზესი ბუნებრივი და ისტორიული ადგილების აღმოსაჩენად.</p>
+                    <p class="footer-description">{% if g.lang=='en' %}A community-oriented platform to discover Georgia's most beautiful natural and historical places.{% else %}საზოგადოებაზე ორიენტირებული პლატფორმა საქართველოს ულამაზესი ბუნებრივი და ისტორიული ადგილების აღმოსაჩენად.{% endif %}</p>
                     <div class="social-links">
                         <a href="https://www.instagram.com/_nanuukkaa_/" class="social-link"><i class="bi bi-instagram"></i></a>
                         <a href="https://www.facebook.com/nanu.kupreishvili" class="social-link"><i class="bi bi-facebook"></i></a>
@@ -273,38 +268,24 @@
                 </div>
 
                 <div class="col-6 col-lg-2 offset-lg-2">
-                    <h4 class="footer-title">აღმოაჩინე</h4>
+                    <h4 class="footer-title">{% if g.lang=='en' %}Explore{% else %}აღმოაჩინე{% endif %}</h4>
                     <ul class="footer-links">
-                        <li><a href="#">ყველა ადგილი</a></li>
-                        <li><a href="#">კატეგორიები</a></li>
-                        <li><a href="#">რეგიონები</a></li>
-                        <li><a href="#">ინტერაქტიული რუკა</a></li>
+                        <li><a href="#">{% if g.lang=='en' %}All places{% else %}ყველა ადგილი{% endif %}</a></li>
+                        <li><a href="#">{% if g.lang=='en' %}Categories{% else %}კატეგორიები{% endif %}</a></li>
+                        <li><a href="#">{% if g.lang=='en' %}Regions{% else %}რეგიონები{% endif %}</a></li>
+                        <li><a href="#">{% if g.lang=='en' %}Interactive map{% else %}ინტერაქტიული რუკა{% endif %}</a></li>
                     </ul>
                 </div>
 
                 <div class="col-6 col-lg-2">
-                    <h4 class="footer-title">საზოგადოება</h4>
+                    <h4 class="footer-title">{% if g.lang=='en' %}Community{% else %}საზოგადოება{% endif %}</h4>
                     <ul class="footer-links">
-                        <li><a href="#">დაამატეთ ადგილი</a></li>
-                        <li><a href="#">დატოვეთ შეფასება</a></li>
-                        <li><a href="#">ჩვენს შესახებ</a></li>
-                        <li><a href="#">კონტაქტი</a></li>
+                        <li><a href="#">{% if g.lang=='en' %}Add a place{% else %}დაამატეთ ადგილი{% endif %}</a></li>
+                        <li><a href="#">{% if g.lang=='en' %}Leave a review{% else %}დატოვეთ შეფასება{% endif %}</a></li>
+                        <li><a href="#">{% if g.lang=='en' %}About us{% else %}ჩვენს შესახებ{% endif %}</a></li>
+                        <li><a href="#">{% if g.lang=='en' %}Contact{% else %}კონტაქტი{% endif %}</a></li>
                     </ul>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="settings-bar py-2" style="background: #1a2e22; ">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div class="lang-switch d-flex gap-2">
-                <button onclick="setLanguage('ka')" id="btn-ka" class="btn btn-sm btn-outline-dark active">KA</button>
-                <button onclick="setLanguage('en')" id="btn-en" class="btn btn-sm btn-outline-light">EN</button>
-            </div>
-            <div class="theme-switch">
-                <button onclick="toggleTheme()" class="btn btn-sm btn-dark" id="theme-icon">
-                    <i class="bi bi-moon-stars"></i>
-                </button>
             </div>
         </div>
     </div>
@@ -312,21 +293,18 @@
     <div class="footer-bottom">
         <div class="container">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                <p>© 2025 GreenSpots. ყველა უფლება დაცულია.</p>
+                <p>© 2025 GreenSpots. {% if g.lang=='en' %}All rights reserved.{% else %}ყველა უფლება დაცულია.{% endif %}</p>
                 <div class="d-flex gap-4">
-                    <a href="#">კონფიდენციალურობის პოლიტიკა</a>
-                    <a href="#">მომსახურების პირობები</a>
+                    <a href="#">{% if g.lang=='en' %}Privacy Policy{% else %}კონფიდენციალურობის პოლიტიკა{% endif %}</a>
+                    <a href="#">{% if g.lang=='en' %}Terms of Service{% else %}მომსახურების პირობები{% endif %}</a>
                 </div>
             </div>
         </div>
     </div>
 </footer>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Custom JS -->
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
-<script src="{{ url_for('static', filename='js/colorsandtxt.js') }}"></script>
 
 {% block js %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -389,17 +367,16 @@ $(document).ready(function(){
         });
     });
 
-    // 5. Counter Animation (Moved inside ready and called immediately)
+    // 5. Counter Animation
     function animateCounters() {
         const counters = document.querySelectorAll('.counter');
         counters.forEach(counter => {
-            const target = +counter.getAttribute('data-target'); // Use getAttribute for safety
-            const duration = 2000; // Increased to 2s for better visual effect
+            const target = +counter.getAttribute('data-target');
+            const duration = 2000;
             const startTime = performance.now();
 
             function update(now) {
                 const progress = Math.min((now - startTime) / duration, 1);
-                // Ease-out function for smoother finish
                 const easeOut = 1 - Math.pow(1 - progress, 3);
                 counter.textContent = Math.floor(easeOut * target);
 
@@ -413,11 +390,31 @@ $(document).ready(function(){
         });
     }
 
-    // Run counters
     animateCounters();
 });
 </script>
+<script>
+// --- Helper functions for cookies ---
+function setCookie(name, value, days = 365) {
+    const d = new Date();
+    d.setTime(d.getTime() + (days*24*60*60*1000));
+    document.cookie = `${name}=${value};path=/;expires=${d.toUTCString()}`;
+}
 
+function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
+}
+
+// --- LANGUAGE TOGGLE ---
+document.getElementById('lang-toggle').addEventListener('click', () => {
+    const current = getCookie('lang') || 'ge';
+    const newLang = current === 'ge' ? 'en' : 'ge';
+    setCookie('lang', newLang);
+    // reload page to apply language
+    location.reload();
+});
+</script>
 {% endblock %}
 </body>
 </html>

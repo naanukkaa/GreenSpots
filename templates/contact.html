@@ -1,16 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}GreenSpots — Contact{% endblock %}
+{% block title %}GreenSpots — {% if g.lang=='en' %}Contact{% else %}კონტაქტი{% endif %}{% endblock %}
 
 {% block css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
-<script>
-    // This MUST run before any CSS loads to prevent the white flash
-    (function() {
-        const savedTheme = localStorage.getItem('gs-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
-</script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/contact.css') }}">
@@ -20,9 +13,11 @@
 
 <section class="hero-section py-5 mt-5 text-center bg-light">
     <div class="container">
-        <h1 class="hero-title mb-3">დაგვიკავშირდით</h1>
+        <h1 class="hero-title mb-3">
+            {% if g.lang=='en' %}Contact Us{% else %}დაგვიკავშირდით{% endif %}
+        </h1>
         <p class="hero-slogan-georgian mb-0">
-            გაგზავნეთ შეტყობინება ან მიიღეთ დახმარება ჩვენი გუნდისგან
+            {% if g.lang=='en' %}Send a message or get help from our team{% else %}გაგზავნეთ შეტყობინება ან მიიღეთ დახმარება ჩვენი გუნდისგან{% endif %}
         </p>
     </div>
 </section>
@@ -32,41 +27,40 @@
         <div class="row justify-content-center">
             <div class="col-lg-6">
 
-                <h2 class="text-center mb-4">გაგზავნე შეტყობინება</h2>
+                <h2 class="text-center mb-4">{% if g.lang=='en' %}Send a Message{% else %}გაგზავნე შეტყობინება{% endif %}</h2>
 
-                <form id="contact-form"
-                      class="shadow-sm p-4 rounded-3 bg-white">
+                <form id="contact-form" class="shadow-sm p-4 rounded-3 bg-white">
 
                     <div class="mb-3">
                         <input type="text" name="name"
                                class="form-control"
-                               placeholder="სახელი" required>
+                               placeholder="{% if g.lang=='en' %}Name{% else %}სახელი{% endif %}" required>
                     </div>
 
                     <div class="mb-3">
                         <input type="email" name="email"
                                class="form-control"
-                               placeholder="ელ. ფოსტა" required>
+                               placeholder="{% if g.lang=='en' %}Email{% else %}ელ. ფოსტა{% endif %}" required>
                     </div>
 
                     <div class="mb-3">
                         <input type="text" name="subject"
                                class="form-control"
-                               placeholder="თემა" required>
+                               placeholder="{% if g.lang=='en' %}Subject{% else %}თემა{% endif %}" required>
                     </div>
 
                     <div class="mb-3">
                         <textarea name="message"
                                   class="form-control"
                                   rows="5"
-                                  placeholder="შეტყობინება"
+                                  placeholder="{% if g.lang=='en' %}Message{% else %}შეტყობინება{% endif %}"
                                   required></textarea>
                     </div>
 
                     <div class="text-center">
                         <button type="submit"
                                 class="btn btn-primary-green w-50">
-                            გაგზავნა
+                            {% if g.lang=='en' %}Send{% else %}გაგზავნა{% endif %}
                         </button>
                     </div>
 
@@ -77,13 +71,12 @@
     </div>
 </section>
 
-<!-- Contact Info -->
 <section class="contact-info py-5 bg-light mb-4">
     <div class="container">
         <div class="row text-center g-4">
             <div class="col-md-4">
                 <i class="bi bi-geo-alt fs-2 mb-2"></i>
-                <p>თბილისი, საქართველო</p>
+                <p>{% if g.lang=='en' %}Tbilisi, Georgia{% else %}თბილისი, საქართველო{% endif %}</p>
             </div>
             <div class="col-md-4">
                 <i class="bi bi-telephone fs-2 mb-2"></i>
@@ -97,15 +90,11 @@
     </div>
 </section>
 
-<!-- Map -->
 <section class="map-section py-5 mb-4">
     <div class="container">
-        <h1 class="mb-4 text-center">ჩვენი ლოკაცია</h1>
+        <h1 class="mb-4 text-center">{% if g.lang=='en' %}Our Location{% else %}ჩვენი ლოკაცია{% endif %}</h1>
         <div class="map-container rounded-3 shadow-sm overflow-hidden">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d47285.01002796176!2d42.157372509389795!3d42.207751828819404!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x405c540482872587%3A0xb63670b21d6a34b1!2sAbasha!5e0!3m2!1sen!2sge!4v1767349645903!5m2!1sen!2sge"
-                    width="1300" height="450" style="border:0;" allowfullscreen="true" loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade">
-            </iframe>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d45684.21541764014!2d42.157372509389795!3d42.207751828819404!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x405c540482872587%3A0xb63670b21d6a34b1!2sAbasha!5e1!3m2!1sen!2sge!4v1768575002337!5m2!1sen!2sge" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
     </div>
 </section>
@@ -113,9 +102,7 @@
 {% endblock %}
 
 {% block js %}
-<script type="text/javascript"
-        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
-</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script type="text/javascript">
    (function(){
       emailjs.init("JU0qPiKzSmXsjH8F6");
@@ -123,28 +110,31 @@
 </script>
 
 <script>
+    const currentLang = "{{ g.lang }}";
+
     document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("contact-form");
+        const form = document.getElementById("contact-form");
 
-    form.addEventListener("submit", function (e) {
-        e.preventDefault();
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
 
-        emailjs.sendForm(
-            "service_t19bydr",
-            "template_3hq9hea", // ← UPDATED TEMPLATE ID
-            this
-        ).then(
-            () => {
-                alert("შეტყობინება გაგზავნილია ✅");
-                form.reset();
-            },
-            (error) => {
-                console.error("EmailJS error:", error);
-                alert("შეტყობინება ვერ გაიგზავნა ❌");
-            }
-        );
+            emailjs.sendForm(
+                "service_t19bydr",
+                "template_3hq9hea",
+                this
+            ).then(
+                () => {
+                    const successMsg = currentLang === 'en' ? "Message sent! ✅" : "შეტყობინება გაგზავნილია ✅";
+                    alert(successMsg);
+                    form.reset();
+                },
+                (error) => {
+                    console.error("EmailJS error:", error);
+                    const errorMsg = currentLang === 'en' ? "Message failed to send ❌" : "შეტყობინება ვერ გაიგზავნა ❌";
+                    alert(errorMsg);
+                }
+            );
+        });
     });
-});
-
 </script>
 {% endblock %}

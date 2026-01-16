@@ -67,7 +67,7 @@ def login():
 def logout():
     logout_user()
     flash('Logged out successfully.', 'success')
-    return redirect(url_for('auth_bp.login'))
+    return redirect(url_for('index'))
 
 
 # ------------------- Delete Account -------------------

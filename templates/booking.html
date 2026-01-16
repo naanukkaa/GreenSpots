@@ -1,16 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}დაჯავშნა — GreenSpots{% endblock %}
+{% block title %}{% if g.lang=='en' %}Booking{% else %}დაჯავშნა{% endif %} — GreenSpots{% endblock %}
 
 {% block css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
-<script>
-    // This MUST run before any CSS loads to prevent the white flash
-    (function() {
-        const savedTheme = localStorage.getItem('gs-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
-</script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/booking.css') }}">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo.png') }}">
@@ -21,8 +14,8 @@
 {% block content %}
 <section class="hero-booking">
     <div class="container">
-        <h1>დაგეგმე შენი თავგადასავალი</h1>
-        <p>აირჩიე ადგილი, თარიღი და შექმენი დაუვიწყარი მოგზაურობა საქართველოში</p>
+        <h1>{% if g.lang=='en' %}Plan Your Adventure{% else %}დაგეგმე შენი თავგადასავალი{% endif %}</h1>
+        <p>{% if g.lang=='en' %}Choose a place, date and create an unforgettable trip in Georgia{% else %}აირჩიე ადგილი, თარიღი და შექმენი დაუვიწყარი მოგზაურობა საქართველოში{% endif %}</p>
     </div>
 </section>
 
@@ -31,42 +24,38 @@
         <div class="booking-form">
             <form id="bookingForm" method="POST" action="{{ url_for('booking') }}">
 
-                <!-- Spot Selection -->
                 <div class="form-section">
-                    <h4>აირჩიე ადგილი</h4>
+                    <h4>{% if g.lang=='en' %}Select a Place{% else %}აირჩიე ადგილი{% endif %}</h4>
                     <select class="form-select" id="spotSelect" name="spot" required>
-                        <option value="" disabled selected>აირჩიე...</option>
+                        <option value="" disabled selected>{% if g.lang=='en' %}Choose...{% else %}აირჩიე...{% endif %}</option>
                         {% for spot in spots %}
                             <option value="{{ spot.name }}">{{ spot.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <!-- Date Selection -->
                 <div class="form-section">
-                    <h4>აირჩიე თარიღი</h4>
+                    <h4>{% if g.lang=='en' %}Select Date{% else %}აირჩიე თარიღი{% endif %}</h4>
                     <input type="date" class="form-control" id="dateInput" name="date" required>
                 </div>
 
-                <!-- Guest Info -->
                 <div class="form-section">
-                    <h4>ინფორმაცია სტუმრის შესახებ</h4>
-                    <input type="text" class="form-control mb-3" id="nameInput" name="name" placeholder="სახელი" required>
-                    <input type="email" class="form-control mb-3" id="emailInput" name="email" placeholder="ელ. ფოსტა" required>
-                    <input type="tel" class="form-control" id="phoneInput" name="phone" placeholder="ტელეფონი" required>
+                    <h4>{% if g.lang=='en' %}Guest Information{% else %}ინფორმაცია სტუმრის შესახებ{% endif %}</h4>
+                    <input type="text" class="form-control mb-3" id="nameInput" name="name" placeholder="{% if g.lang=='en' %}Name{% else %}სახელი{% endif %}" required>
+                    <input type="email" class="form-control mb-3" id="emailInput" name="email" placeholder="{% if g.lang=='en' %}Email{% else %}ელ. ფოსტა{% endif %}" required>
+                    <input type="tel" class="form-control" id="phoneInput" name="phone" placeholder="{% if g.lang=='en' %}Phone{% else %}ტელეფონი{% endif %}" required>
                 </div>
 
-                <!-- Summary -->
                 <div class="booking-summary" id="summary" style="display:none;">
-                    <h5>შეკვეთის მიმოხილვა</h5>
-                    <p><strong>ადგილი:</strong> <span id="summarySpot"></span></p>
-                    <p><strong>თარიღი:</strong> <span id="summaryDate"></span></p>
-                    <p><strong>სტუმარი:</strong> <span id="summaryName"></span></p>
-                    <p><strong>ელ. ფოსტა:</strong> <span id="summaryEmail"></span></p>
-                    <p><strong>ტელეფონი:</strong> <span id="summaryPhone"></span></p>
+                    <h5>{% if g.lang=='en' %}Order Review{% else %}შეკვეთის მიმოხილვა{% endif %}</h5>
+                    <p><strong>{% if g.lang=='en' %}Place:{% else %}ადგილი:{% endif %}</strong> <span id="summarySpot"></span></p>
+                    <p><strong>{% if g.lang=='en' %}Date:{% else %}თარიღი:{% endif %}</strong> <span id="summaryDate"></span></p>
+                    <p><strong>{% if g.lang=='en' %}Guest:{% else %}სტუმარი:{% endif %}</strong> <span id="summaryName"></span></p>
+                    <p><strong>{% if g.lang=='en' %}Email:{% else %}ელ. ფოსტა:{% endif %}</strong> <span id="summaryEmail"></span></p>
+                    <p><strong>{% if g.lang=='en' %}Phone:{% else %}ტელეფონი:{% endif %}</strong> <span id="summaryPhone"></span></p>
                 </div>
 
-                <button type="submit" class="btn btn-confirm w-100 mt-3">დადასტურება</button>
+                <button type="submit" class="btn btn-confirm w-100 mt-3">{% if g.lang=='en' %}Confirm Booking{% else %}დადასტურება{% endif %}</button>
             </form>
         </div>
     </div>
@@ -74,97 +63,88 @@
 {% endblock %}
 
 {% block js %}
-<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-<!-- EmailJS -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script type="text/javascript">
     emailjs.init("JU0qPiKzSmXsjH8F6");
 </script>
 
 <script>
+    // Language detection for JS
+    const currentLang = "{{ g.lang }}";
+
     $(document).ready(function() {
-    $('#spotSelect').select2({
-        placeholder: "მოძებნე ადგილი...",
-        allowClear: true,
-        width: '100%' // Ensures it matches your Bootstrap styling
-    });
-});
-    $("#liveSearch").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    $(".spot-card").filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-    });
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('bookingForm');
-    const summary = document.getElementById('summary');
-
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const name = document.getElementById('nameInput').value.trim();
-        const email = document.getElementById('emailInput').value.trim();
-        const phone = document.getElementById('phoneInput').value.trim();
-        const spot = document.getElementById('spotSelect').value;
-        const date = document.getElementById('dateInput').value;
-
-        if (!name || !email || !phone || !spot || !date) {
-            alert("გთხოვთ შეიყვანოთ ყველა აუცილებელი ველი");
-            return;
-        }
-
-        // Update summary
-        document.getElementById('summarySpot').textContent = spot;
-        document.getElementById('summaryDate').textContent = date;
-        document.getElementById('summaryName').textContent = name;
-        document.getElementById('summaryEmail').textContent = email;
-        document.getElementById('summaryPhone').textContent = phone;
-        summary.style.display = 'block';
-        summary.scrollIntoView({ behavior: "smooth" });
-
-        // Send data to backend via fetch
-        fetch("{{ url_for('booking') }}", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({
-                spot: spot,
-                date: date,
-                name: name,
-                email: email,
-                phone: phone
-            })
-        })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url; // redirect to profile
-            }
-
-            // Send confirmation email via EmailJS
-            const templateParams = {
-                to_name: name,
-                to_email: email,
-                spot: spot,
-                date: date,
-                phone: phone
-            };
-
-            emailjs.send('service_92mfzff', 'template_d5vie7m', templateParams)
-                .then(function(res) {
-                    console.log('Email sent', res.status, res.text);
-                }, function(err) {
-                    console.error('EmailJS error', err);
-                });
-        })
-        .catch(err => {
-            console.error(err);
-            alert("შეცდომა! გთხოვთ სცადოთ თავიდან.");
+        $('#spotSelect').select2({
+            placeholder: currentLang === 'en' ? "Search for a place..." : "მოძებნე ადგილი...",
+            allowClear: true,
+            width: '100%'
         });
     });
-});
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('bookingForm');
+        const summary = document.getElementById('summary');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('nameInput').value.trim();
+            const email = document.getElementById('emailInput').value.trim();
+            const phone = document.getElementById('phoneInput').value.trim();
+            const spot = document.getElementById('spotSelect').value;
+            const date = document.getElementById('dateInput').value;
+
+            if (!name || !email || !phone || !spot || !date) {
+                alert(currentLang === 'en' ? "Please fill in all required fields" : "გთხოვთ შეიყვანოთ ყველა აუცილებელი ველი");
+                return;
+            }
+
+            // Update summary
+            document.getElementById('summarySpot').textContent = spot;
+            document.getElementById('summaryDate').textContent = date;
+            document.getElementById('summaryName').textContent = name;
+            document.getElementById('summaryEmail').textContent = email;
+            document.getElementById('summaryPhone').textContent = phone;
+            summary.style.display = 'block';
+            summary.scrollIntoView({ behavior: "smooth" });
+
+            fetch("{{ url_for('booking') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({
+                    spot: spot,
+                    date: date,
+                    name: name,
+                    email: email,
+                    phone: phone
+                })
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+
+                const templateParams = {
+                    to_name: name,
+                    to_email: email,
+                    spot: spot,
+                    date: date,
+                    phone: phone
+                };
+
+                emailjs.send('service_92mfzff', 'template_d5vie7m', templateParams)
+                    .then(function(res) {
+                        console.log('Email sent', res.status, res.text);
+                    }, function(err) {
+                        console.error('EmailJS error', err);
+                    });
+            })
+            .catch(err => {
+                console.error(err);
+                alert(currentLang === 'en' ? "Error! Please try again." : "შეცდომა! გთხოვთ სცადოთ თავიდან.");
+            });
+        });
+    });
 </script>
 {% endblock %}

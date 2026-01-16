@@ -1,15 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}კატეგორიები — GreenSpots{% endblock %}
+{% block title %}
+    {% if g.lang=='en' %}Categories{% else %}კატეგორიები{% endif %} — GreenSpots
+{% endblock %}
 
 {% block css %}
-<script>
-    // This MUST run before any CSS loads to prevent the white flash
-    (function() {
-        const savedTheme = localStorage.getItem('gs-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    })();
-</script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/categories.css') }}">
@@ -20,23 +15,22 @@
 <section class="filter-section">
     <div class="filter-container">
 
-        <!-- Filter button -->
         <div class="filter-dropdown">
             <button class="btn-filter" id="filter-toggle">
-                <i class="bi bi-funnel"></i> ფილტრი
+                <i class="bi bi-funnel"></i> {% if g.lang=='en' %}Filter{% else %}ფილტრი{% endif %}
             </button>
 
-            <!-- Hidden panel -->
             <div class="filter-panel">
                 <form class="filter-form" method="get">
                     <select name="region" class="filter-item">
-                        <option value="">ყველა რეგიონი</option>
+                        <option value="">{% if g.lang=='en' %}All Regions{% else %}ყველა რეგიონი{% endif %}</option>
                         {% for code, name in regions_list %}
                         <option value="{{ code }}" {% if selected_region == code %}selected{% endif %}>{{ name }}</option>
                         {% endfor %}
                     </select>
+
                     <select name="category" class="filter-item">
-                        <option value="">ყველა კატეგორია</option>
+                        <option value="">{% if g.lang=='en' %}All Categories{% else %}ყველა კატეგორია{% endif %}</option>
                         {% for category in categories_list %}
                             <option value="{{ category }}"
                                 {% if selected_category == category %}selected{% endif %}>
@@ -44,40 +38,41 @@
                             </option>
                         {% endfor %}
                     </select>
+
                     <select name="rating" class="filter-item">
-                        <option value="">ყველა შეფასება</option>
-                        <option value="5" {% if min_rating == '5' %}selected{% endif %}>5 ვარსკვლავი</option>
-                        <option value="4" {% if min_rating == '4' %}selected{% endif %}>4 ვარსკვლავი და მეტი</option>
-                        <option value="3" {% if min_rating == '3' %}selected{% endif %}>3 ვარსკვლავი და მეტი</option>
-                        <option value="2" {% if min_rating == '2' %}selected{% endif %}>2 ვარსკვლავი და მეტი</option>
-                        <option value="1" {% if min_rating == '1' %}selected{% endif %}>1 ვარსკვლავი და მეტი</option>
+                        <option value="">{% if g.lang=='en' %}All Ratings{% else %}ყველა შეფასება{% endif %}</option>
+                        <option value="5" {% if min_rating == '5' %}selected{% endif %}>5 {% if g.lang=='en' %}Stars{% else %}ვარსკვლავი{% endif %}</option>
+                        <option value="4" {% if min_rating == '4' %}selected{% endif %}>4+ {% if g.lang=='en' %}Stars{% else %}ვარსკვლავი და მეტი{% endif %}</option>
+                        <option value="3" {% if min_rating == '3' %}selected{% endif %}>3+ {% if g.lang=='en' %}Stars{% else %}ვარსკვლავი და მეტი{% endif %}</option>
+                        <option value="2" {% if min_rating == '2' %}selected{% endif %}>2+ {% if g.lang=='en' %}Stars{% else %}ვარსკვლავი და მეტი{% endif %}</option>
+                        <option value="1" {% if min_rating == '1' %}selected{% endif %}>1+ {% if g.lang=='en' %}Stars{% else %}ვარსკვლავი და მეტი{% endif %}</option>
                     </select>
 
                     <div class="checkbox-wrapper">
                         <input type="checkbox" name="favorites_only" id="favorites_only" {% if favorites_only == 'on' %}checked{% endif %}>
-                        <label for="favorites_only">მხოლოდ ფავორიტები</label>
+                        <label for="favorites_only">{% if g.lang=='en' %}Favorites Only{% else %}მხოლოდ ფავორიტები{% endif %}</label>
                     </div>
 
-                    <button type="submit" class="btn-submit">გაფილტვრა</button>
+                    <button type="submit" class="btn-submit">{% if g.lang=='en' %}Apply Filter{% else %}გაფილტვრა{% endif %}</button>
                 </form>
             </div>
         </div>
 
-        <!-- Search + Add Place -->
         <div class="search-add-wrapper">
             <form class="search-form">
-                <input type="text" name="q" class="search-input" placeholder="ძებნა ადგილების მიხედვით…" value="{{ search_query }}">
-                <button type="submit" class="btn-search"><i class="bi bi-search"></i> ძებნა</button>
+                <input type="text" name="q" class="search-input"
+                       placeholder="{% if g.lang=='en' %}Search by place...{% else %}ძებნა ადგილების მიხედვით…{% endif %}"
+                       value="{{ search_query }}">
+                <button type="submit" class="btn-search"><i class="bi bi-search"></i> {% if g.lang=='en' %}Search{% else %}ძებნა{% endif %}</button>
             </form>
             <a href="{{ url_for('add_place') }}" class="btn-add-place">
-                <i class="bi bi-geo-alt"></i> დაამატე ადგილი
+                <i class="bi bi-geo-alt"></i> {% if g.lang=='en' %}Add Place{% else %}დაამატე ადგილი{% endif %}
             </a>
         </div>
 
     </div>
 </section>
 
-<!-- PLACES CARDS -->
 <section class="categories-section">
     <div class="container">
         <div class="row g-4">
@@ -121,15 +116,15 @@
                 {% endfor %}
             {% else %}
                 <div class="col-12 text-center">
-                    <p class="text-muted">ცარიელი შედეგი…</p>
+                    <p class="text-muted">{% if g.lang=='en' %}No results found...{% else %}ცარიელი შედეგი…{% endif %}</p>
                 </div>
             {% endif %}
         </div>
     </div>
+
     {% if total_pages > 1 %}
     <nav aria-label="Page navigation" class="mt-5">
         <ul class="pagination justify-content-center">
-
             <li class="page-item {% if page == 1 %}disabled{% endif %}">
                 <a class="page-link" href="{{ url_for('categories', page=1, q=search_query, category=selected_category, region=selected_region, rating=min_rating, favorites_only=favorites_only) }}">
                     <i class="bi bi-chevron-double-left"></i>
@@ -161,7 +156,6 @@
                     <i class="bi bi-chevron-double-right"></i>
                 </a>
             </li>
-
         </ul>
     </nav>
     {% endif %}
@@ -178,14 +172,10 @@ toggleBtn.addEventListener("click", (e) => {
     filterPanel.classList.toggle("show");
 });
 
-// Close when clicking outside
 document.addEventListener("click", (e) => {
     if (!filterPanel.contains(e.target) && e.target !== toggleBtn) {
         filterPanel.classList.remove("show");
     }
 });
-
 </script>
 {% endblock %}
-
-
