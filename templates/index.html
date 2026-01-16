@@ -22,9 +22,8 @@
 </head>
 <body>
 <div id="video-preloader">
-    <video id="intro-video" autoplay muted playsinline preload="auto">
+    <video id="intro-video" autoplay muted playsinline preload="auto" poster="{{ url_for('static', filename='img/placeholder.png') }}">
         <source src="{{ url_for('static', filename='img/loading.mp4') }}" type="video/mp4">
-        Your browser does not support the video tag.
     </video>
 </div>
 <!-- Navbar -->
@@ -331,36 +330,42 @@ document.addEventListener('DOMContentLoaded', function() {
     const preloader = document.getElementById('video-preloader');
     const introVideo = document.getElementById('intro-video');
 
-    // Check if the user has already seen the video this session
-    const hasSeenLoader = sessionStorage.getItem('loaderSeen');
+    if (!preloader || !introVideo) return;
 
-    if (hasSeenLoader) {
-        // If they saw it, remove it immediately so it doesn't block the site
-        if (preloader) preloader.remove();
-    } else {
-        if (preloader && introVideo) {
-            // Function to handle the transition
-            const startFadeOut = () => {
-                preloader.classList.add('fade-out'); // Matches your CSS
-                sessionStorage.setItem('loaderSeen', 'true');
+    // 1. Force Mute (Browsers are strict on live servers)
+    introVideo.muted = true;
 
-                // Remove from DOM after the 1s transition finishes
-                setTimeout(() => {
-                    preloader.remove();
-                }, 1000);
-            };
+    // 2. Force Play
+    const playPromise = introVideo.play();
 
-            // Trigger fade out when video ends
-            introVideo.onended = startFadeOut;
-
-            // Safety fallback: if video fails, hide after 4 seconds
-            setTimeout(() => {
-                if (document.getElementById('video-preloader')) {
-                    startFadeOut();
-                }
-            }, 4000);
-        }
+    if (playPromise !== undefined) {
+        playPromise.then(_ => {
+            // Video started playing successfully
+            console.log("Video playing on Render");
+        }).catch(error => {
+            // Autoplay was prevented
+            console.error("Autoplay prevented:", error);
+            // If it fails, don't leave the user stuck on a black screen!
+            removePreloader();
+        });
     }
+
+    // 3. Logic to remove preloader
+    function removePreloader() {
+        preloader.classList.add('fade-out');
+        setTimeout(() => preloader.remove(), 1000);
+    }
+
+    // Hide when video ends
+    introVideo.onended = removePreloader;
+
+    // SAFETY: If video hasn't finished in 5 seconds, kill the loader anyway
+    setTimeout(() => {
+        if (document.body.contains(preloader)) {
+            removePreloader();
+        }
+    }, 5000);
+});
 
     const animatedElements = document.querySelectorAll('.animate-on-scroll');
     const observer = new IntersectionObserver((entries) => {
