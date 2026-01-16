@@ -11,8 +11,10 @@ from types import SimpleNamespace
 from flask_wtf import CSRFProtect
 import os
 import random
+import mimetypes
 
 # ---------------- INIT APP ----------------
+mimetypes.add_type('video/mp4', '.mp4')
 app = Flask(__name__, template_folder='templates')
 app.config["SECRET_KEY"] = "super-secret-key"
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
@@ -250,41 +252,57 @@ def categories():
         search_query=search_query
     )
 
+
 @app.route("/add-place", methods=["GET", "POST"])
 @login_required
 def add_place():
     form = PlaceForm()
     if form.validate_on_submit():
+        place_name = form.name.data.strip()
+
+        existing_place = Place.query.filter(Place.name.ilike(place_name)).first()
+
+        if existing_place:
+            flash(f"ადგილი სახელით '{place_name}' უკვე არსებობს ბაზაში!", "warning")
+            return render_template("add-place.html", form=form)
+
         filename = None
         if form.image.data:
             filename = secure_filename(form.image.data.filename)
             form.image.data.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
+        # 3. Handle Coordinates
         latitude = request.form.get("latitude")
         longitude = request.form.get("longitude")
 
         if not latitude or not longitude:
             flash("გთხოვ აირჩიე ადგილი რუკაზე", "danger")
-            return redirect(request.url)
+            return render_template("add-place.html", form=form)
 
-        place = Place(
-            name=form.name.data,
-            description=form.description.data,
-            category=form.category.data,
-            region=form.region.data,
-            image=filename,
-            latitude=float(latitude),
-            longitude=float(longitude),
-            user_id = current_user.id
-        )
+        # 4. Save the New Place
+        try:
+            place = Place(
+                name=place_name,  # Use the cleaned name
+                description=form.description.data,
+                category=form.category.data,
+                region=form.region.data,
+                image=filename,
+                latitude=float(latitude),
+                longitude=float(longitude),
+                user_id=current_user.id
+            )
 
-        db.session.add(place)
-        db.session.commit()
-        flash("Place added successfully!", "success")
-        return redirect(url_for("categories"))
+            db.session.add(place)
+            db.session.commit()
+            flash("ადგილი წარმატებით დაემატა!", "success")
+            return redirect(url_for("categories"))
+
+        except Exception as e:
+            db.session.rollback()
+            flash("მოხდა შეცდომა შენახვისას.", "danger")
+            print(f"Error: {e}")
 
     return render_template("add-place.html", form=form)
-
 
 @app.route("/place/<int:place_id>", methods=["GET", "POST"])
 @login_required
