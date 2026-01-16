@@ -21,11 +21,6 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo.png') }}">
 </head>
 <body>
-<div id="video-preloader">
-    <video id="intro-video" autoplay muted playsinline preload="auto" poster="{{ url_for('static', filename='img/placeholder.png') }}">
-        <source src="{{ url_for('static', filename='img/loading.mp4') }}" type="video/mp4">
-    </video>
-</div>
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-greenspots fixed-top">
     <div class="container">
@@ -237,13 +232,23 @@
 
 <!-- Footer -->
 <footer id="about">
-    <div class="footer-cta">
-        <div class="container">
-            <h2>იცით ფარული ადგილი?</h2>
-            <p>გაუზიარეთ თქვენი აღმოჩენები საზოგადოებას. დაეხმარეთ მოგზაურებს, განიცადონ ნამდვილი საქართველო.</p>
-            <button class="btn btn-accent"><i class="bi bi-geo-alt me-2"></i> დაამატეთ თქვენი ადგილი</button>
+    <section class="cta-section" style="position: relative; overflow: hidden; padding: 80px 0; color: white;">
+        <video autoplay muted loop playsinline id="footer-video"
+               style="position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: 200px; z-index: 0; transform: translate(-50%, -50%); object-fit: cover;">
+            <source src="{{ url_for('static', filename='img/loading.mp4') }}" type="video/mp4">
+        </video>
+
+        <div class="overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 46, 34, 0.7); z-index: 1;"></div>
+
+        <div class="container" style="position: relative; z-index: 2; text-align: center;">
+            <h2 style="font-size: 50px; margin-bottom: 20px;">იცით ფარული ადგილი?</h2>
+            <p style="margin-bottom: 30px; font-size: 20px;">გაუზიარეთ თქვენი აღმოჩენები საზოგადოებას.</p>
+            <a href="{{ url_for('add_place') }}" class="btn btn-primary"
+               style="background-color: #d4a373; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold;">
+               დაამატეთ თქვენი ადგილი
+            </a>
         </div>
-    </div>
+    </section>
 
     <div class="footer-main">
         <div class="container">
@@ -304,69 +309,28 @@
 <!-- Custom JS -->
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 
-{%block js%}
+{% block js %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 
 <script>
-// 1. Slick Slider Initialization
 $(document).ready(function(){
-  $('.spot-carousel').slick({
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 2000,
-    infinite: true,
-    arrows: true,
-    dots: true,
-    responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 2 } },
-      { breakpoint: 600, settings: { slidesToShow: 1 } }
-    ]
-  });
-});
+    // 1. Slick Slider Initialization
+    $('.spot-carousel').slick({
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 2000,
+        infinite: true,
+        arrows: true,
+        dots: true,
+        responsive: [
+            { breakpoint: 1024, settings: { slidesToShow: 2 } },
+            { breakpoint: 600, settings: { slidesToShow: 1 } }
+        ]
+    });
 
-document.addEventListener('DOMContentLoaded', function() {
-    const preloader = document.getElementById('video-preloader');
-    const introVideo = document.getElementById('intro-video');
-
-    if (!preloader || !introVideo) return;
-
-    // 1. Force Mute (Browsers are strict on live servers)
-    introVideo.muted = true;
-
-    // 2. Force Play
-    const playPromise = introVideo.play();
-
-    if (playPromise !== undefined) {
-        playPromise.then(_ => {
-            // Video started playing successfully
-            console.log("Video playing on Render");
-        }).catch(error => {
-            // Autoplay was prevented
-            console.error("Autoplay prevented:", error);
-            // If it fails, don't leave the user stuck on a black screen!
-            removePreloader();
-        });
-    }
-
-    // 3. Logic to remove preloader
-    function removePreloader() {
-        preloader.classList.add('fade-out');
-        setTimeout(() => preloader.remove(), 1000);
-    }
-
-    // Hide when video ends
-    introVideo.onended = removePreloader;
-
-    // SAFETY: If video hasn't finished in 5 seconds, kill the loader anyway
-    setTimeout(() => {
-        if (document.body.contains(preloader)) {
-            removePreloader();
-        }
-    }, 5000);
-});
-
+    // 2. Scroll Animations
     const animatedElements = document.querySelectorAll('.animate-on-scroll');
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry, index) => {
@@ -383,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     animatedElements.forEach(el => observer.observe(el));
 
-    // === 3. NAVBAR & SMOOTH SCROLL ===
+    // 3. Navbar Logic
     const navbar = document.querySelector('.navbar-greenspots');
     window.addEventListener('scroll', function() {
         if (window.scrollY > 50) {
@@ -395,6 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // 4. Smooth Scroll
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             e.preventDefault();
@@ -404,27 +369,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // 5. Counter Animation (Moved inside ready and called immediately)
+    function animateCounters() {
+        const counters = document.querySelectorAll('.counter');
+        counters.forEach(counter => {
+            const target = +counter.getAttribute('data-target'); // Use getAttribute for safety
+            const duration = 2000; // Increased to 2s for better visual effect
+            const startTime = performance.now();
+
+            function update(now) {
+                const progress = Math.min((now - startTime) / duration, 1);
+                // Ease-out function for smoother finish
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                counter.textContent = Math.floor(easeOut * target);
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    counter.textContent = target;
+                }
+            }
+            requestAnimationFrame(update);
+        });
+    }
+
+    // Run counters
+    animateCounters();
 });
-
-// 3. Counter Animation
-function animateCounters() {
-    const counters = document.querySelectorAll('.counter');
-    counters.forEach(counter => {
-        const target = +counter.dataset.target;
-        const duration = 800;
-        const startTime = performance.now();
-
-        function update(now) {
-            const progress = Math.min((now - startTime) / duration, 1);
-            counter.textContent = Math.floor(progress * target);
-            if (progress < 1) requestAnimationFrame(update);
-            else counter.textContent = target;
-        }
-        requestAnimationFrame(update);
-    });
-}
-window.addEventListener('load', animateCounters);
 </script>
-{%endblock%}
+{% endblock %}
 </body>
 </html>

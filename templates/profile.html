@@ -47,15 +47,13 @@
     </div>
 </section>
 
-<section class="added-locs">
-    <h3>ჩემი დამატებული ადგილები</h3>
-    <div class="my-places" style="display: flex; gap: 20px; flex-wrap: wrap;">
-        {% for place in my_places %}
-            <div class="place-card" id="my-place-{{ place.id }}">
-                <img src="{{ url_for('static', filename='uploads/' ~ place.image) }}" alt="{{ place.name }}" style="width:200px; height:150px; object-fit:cover;">
-                <div class="place-info">
-                    <h5>{{ place.name }}</h5>
-                    <button class="btn btn-danger btn-sm" onclick="deletePlace({{ place.id }})">წაშლა</button>
+<section class="added-locs container">
+    <h3 class="mb-4">ჩემი დამატებული ადგილები</h3>
+    <div class="my-places-slider"> {% for place in my_places %}
+            <div class="place-card">
+                <img src="{{ url_for('static', filename='uploads/' ~ place.image) }}" alt="{{ place.name }}">
+                <div class="place-info mt-2">
+                    <h5 class="text-center">{{ place.name }}</h5>
                 </div>
             </div>
         {% else %}
@@ -137,7 +135,7 @@ $(document).ready(function() {
         autoplaySpeed: 2500,
         arrows: true,
         dots: true,
-        infinite: false,
+        infinite: true,
         responsive: [
             { breakpoint: 1024, settings: { slidesToShow: 3 } },
             { breakpoint: 768, settings: { slidesToShow: 2 } },
@@ -200,6 +198,42 @@ $(document).ready(function() {
             alert('შეცდომა მოხდა წაშლისას');
         });
     };
+});
+</script>
+
+<script>
+$(document).ready(function(){
+    $('.my-places-slider').slick({
+        infinite: false, // Stops at the last added place
+        slidesToShow: 4, // 4 items on desktop
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 2500,
+        dots: true,      // Shows those little navigation dots
+        arrows: true,    // Shows left/right arrows
+        infinite: true,
+        responsive: [
+            {
+                breakpoint: 1024,
+                settings: {
+                    slidesToShow: 3
+                }
+            },
+            {
+                breakpoint: 768,
+                settings: {
+                    slidesToShow: 2
+                }
+            },
+            {
+                breakpoint: 480,
+                settings: {
+                    slidesToShow: 1,
+                    arrows: false // Better for small mobile screens
+                }
+            }
+        ]
+    });
 });
 </script>
 {% endblock %}

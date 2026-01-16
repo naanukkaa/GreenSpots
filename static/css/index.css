@@ -1,26 +1,3 @@
-#video-preloader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: black;
-    z-index: 10000; /* Increased to stay on top of everything */
-    opacity: 1;
-    transition: opacity 1s ease;
-    pointer-events: all; /* Prevents clicking things behind it */
-}
-
-#video-preloader.fade-out {
-    opacity: 0;
-    pointer-events: none; /* Allows clicking site after fade */
-}
-
-#intro-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
 
 :root {
     --forest-50: #f0f5f2;
