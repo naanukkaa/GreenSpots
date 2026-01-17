@@ -375,6 +375,19 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 2px;
 }
 
+.hero-stats-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+/* desktop: no finger */
+.scroll-hint {
+    display: none;
+}
+
+
 .floating-orb {
     position: absolute;
     border-radius: 50%;
@@ -1064,6 +1077,45 @@ h1, h2, h3, h4, h5, h6 {
     .lang-toggle{
         width: 30px !important;
     }
+
+    .scroll-indicator {
+        display: none; /* kill mouse */
+    }
+
+    .scroll-hint {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: scroll-bounce 1.4s infinite;
+        opacity: 0.7;
+    }
+
+    .scroll-hint img {
+        width: 42px;
+        height: auto;
+        filter: brightness(0) invert(1);
+        transform: translateX(-3px);
+    }
+
+    .scroll-hint .arrow {
+        margin-top: 6px;
+        width: 16px;
+        height: 16px;
+        border-right: 2px solid rgba(255,255,255,0.7);
+        border-bottom: 2px solid rgba(255,255,255,0.7);
+        transform: rotate(45deg);
+    }
+}
+
+@keyframes scroll-bounce {
+    0%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    50% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
 }
 
 img {
@@ -1232,11 +1284,15 @@ body {
     }
 
     .hero-stats {
-        flex-direction: column;
+        flex-direction: row;
     }
 
     .stat-label {
-        font-size: 0.85rem;
+        font-size: 12px;
+    }
+
+    .hero-number span {
+        font-size: 20px;
     }
 
     .section-title {
